@@ -35,7 +35,8 @@ const userSchema = new mongoose.Schema({
       ref: 'User',
     },
   ],  
-}); 
+},
+  ); 
 
 
 userSchema.pre('save', async function (next) {
