@@ -7,25 +7,17 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
-  const [genderPreference, setGenderPreference] = useState("");
+
+  const { signup, loading } = useAuthStore();
 
 
-  const loading = false;
-
-  const signup = () => {
-    alert("Sign up");
-  }
-
-  const { authUserName, authUserLastName } = useAuthStore();
-
-  console.log(authUserName, authUserLastName);
 
   return (
     <form
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        signup({ name, email, password, gender, age, genderPreference });
+        signup({ name, email, password, gender, age });
       }}
     >
       {/* NAME */}
@@ -177,55 +169,6 @@ const SignUpForm = () => {
             />
             <label htmlFor="other" className="ml-2 block text-sm text-gray-900">
               Other
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* GENDER PREFERENCE */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Prefer Me</label>
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center">
-            <input
-              id="prefer-male"
-              name="gender-preference"
-              type="radio"
-              value="male"
-              checked={genderPreference === "male"}
-              onChange={(e) => setGenderPreference(e.target.value)}
-              className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
-            />
-            <label htmlFor="prefer-male" className="ml-2 block text-sm text-gray-900">
-              Male
-            </label>
-          </div>
-          <div className="flex items-center">
-            <input
-              id="prefer-female"
-              name="gender-preference"
-              type="radio"
-              value="female"
-              checked={genderPreference === "female"}
-              onChange={(e) => setGenderPreference(e.target.value)}
-              className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
-            />
-            <label htmlFor="prefer-female" className="ml-2 block text-sm text-gray-900">
-              Female
-            </label>
-          </div>
-          <div className="flex items-center">
-            <input
-              id="prefer-both"
-              name="gender-preference"
-              type="radio"
-              value="both"
-              checked={genderPreference === "both"}
-              onChange={(e) => setGenderPreference(e.target.value)}
-              className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300"
-            />
-            <label htmlFor="prefer-both" className="ml-2 block text-sm text-gray-900">
-              Both
             </label>
           </div>
         </div>
