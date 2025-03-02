@@ -31,6 +31,7 @@ export const signup = async (req, res) => {
       email,
       password,
       age,
+      gender,
 
     })
 
