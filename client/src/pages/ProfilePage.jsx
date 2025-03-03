@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useAuthStore } from '../store/useAuthStore';
+import { useNavigate } from 'react-router-dom';
 
-// Assuming you have a function to get the current user's data from an API or state
 const ProfilePage = () => {
-  // State to hold user data
+  const { authUser } = useAuthStore();
   const [user, setUser] = useState({
     name: '',
     age: '',
@@ -12,31 +13,24 @@ const ProfilePage = () => {
     categories: [],
   });
 
-  // Fetch the user's data (You can replace this with actual fetching logic)
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Example: Replace this with actual logic to fetch user data
-    const fetchedUserData = {
-      name: 'John Doe',
-      age: 'over 18',
-      gender: 'male',
-      bio: "I'm John Doe, I love coding and learning new tech.",
-      availability: [
-        'Monday: 9 AM - 5 PM',
-        'Tuesday: 10 AM - 4 PM',
-        'Wednesday: 9 AM - 3 PM',
-        'Thursday: 9 AM - 5 PM',
-        'Friday: 10 AM - 4 PM',
-      ],
-      categories: [
-        'Web Development',
-        'Mobile Development',
-        'Database Management',
-        'Machine Learning',
-        'Cloud Computing',
-      ],
-    };
-    setUser(fetchedUserData);
-  }, []);
+    if (authUser) {
+      setUser({
+        name: authUser.name,
+        age: authUser.age,
+        gender: authUser.gender,
+        bio: authUser.bio || '',
+        availability: authUser.availability || [],
+        categories: authUser.categories || [],
+      });
+    }
+  }, [authUser]);
+
+  const handleHomeClick = () => {
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-400 to-green-400 p-4">
@@ -90,6 +84,16 @@ const ProfilePage = () => {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Home Button */}
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={handleHomeClick}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
+          >
+            Home
+          </button>
         </div>
       </div>
     </div>
