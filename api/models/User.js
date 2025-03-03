@@ -25,10 +25,7 @@ const userSchema = new mongoose.Schema({
     required: true,
       enum:['male' ,'female','other']
     },
-  // image: {
-  //   type: String, 
-  //   required: true 
-  //   },
+    image: { type: String, default: "" },
   // matches: [
   //   // {
   //   //   type: mongoose.Schema.Types.ObjectId,
@@ -39,18 +36,20 @@ const userSchema = new mongoose.Schema({
   ); 
 
 
-userSchema.pre('save', async function (next) {
-
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-})  // 1234-> hashed password
-
-
-userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};  // this is a method that will be available on the user copmared to statics
-
-
-const User = mongoose.model('User', userSchema);
-
-export default User;
+  userSchema.pre("save", async function (next) {
+   
+    if (!this.isModified("password")) {
+      return next();
+    }
+  
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+  });
+  
+  userSchema.methods.matchPassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+  };
+  
+  const User = mongoose.model("User", userSchema);
+  
+  export default User;

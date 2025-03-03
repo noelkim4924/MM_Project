@@ -40,7 +40,7 @@ export const useAuthStore = create((set) => ({
       console.log("Logout response:", res);
       if (res.status === 200) {
         set({ authUser: null });
-        // navigate는 HomePage에서 처리하므로 여기서는 상태만 업데이트
+        
       }
     } catch (error) {
       console.error("Logout error:", error.response?.data);
