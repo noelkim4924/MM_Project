@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
 import { useProfileStore } from "../store/useProfileStore";
+import CategoryDropdown from "../components/CategoryDropdown"; // Import the new component
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
@@ -46,12 +47,8 @@ const ProfilePage = () => {
     }
   };
 
-  const handleCategoryChange = (e) => {
-    const value = e.target.value;
-    if (value && !categories.includes(value)) {
-      setCategories([...categories, value]);
-    }
-    e.target.value = ""; // Reset dropdown after selection
+  const handleCategoryChange = (newCategories) => {
+    setCategories(newCategories);
   };
 
   const removeCategory = (categoryToRemove) => {
@@ -71,11 +68,9 @@ const ProfilePage = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Your Profile</h2>
         </div>
 
-
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* IMAGE */}
               <div className="text-center">
                 {image && (
@@ -179,43 +174,11 @@ const ProfilePage = () => {
               </div>
 
               {/* CATEGORIES */}
-              <div>
-                <label htmlFor="categories" className="block text-sm font-medium text-gray-700">
-                  Categories
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="categories"
-                    name="categories"
-                    onChange={handleCategoryChange}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  >
-                    <option value="">Add a category</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Health">Health</option>
-                    <option value="Education">Education</option>
-                    <option value="Entertainment">Entertainment</option>
-                    <option value="Sports">Sports</option>
-                  </select>
-                </div>
-                <div className="mt-2 space-y-2">
-                  {categories.map((category, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-gray-100 p-2 rounded-md"
-                    >
-                      <span>{category}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeCategory(category)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CategoryDropdown
+                selectedCategories={categories}
+                onCategoryChange={handleCategoryChange}
+                onRemoveCategory={removeCategory}
+              />
 
               <button
                 type="submit"
