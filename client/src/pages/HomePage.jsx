@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import { Header } from '../components/Header'; // Import the Header component
 
 const HomePage = () => {
   const { logout } = useAuthStore();
@@ -13,25 +14,24 @@ const HomePage = () => {
     });
   };
 
-  const goToProfile = () => {
-    navigate('/profile');
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Homepage</h1>
-      <ul className="space-y-2">
-        <li>
-          <button onClick={goToProfile} className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">
-            Profile
-          </button>
-        </li>
-        <li>
-          <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600">
-            Logout
-          </button>
-        </li>
-      </ul>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Header /> {/* Add the Header component here */}
+      <div className="flex-grow flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Homepage</h2>
+        </div>
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 px-4 border rounded-md bg-red-600 text-white shadow-sm"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
