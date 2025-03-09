@@ -48,4 +48,27 @@ export const createUserProfile = async (req, res) => {
     console.error('Error creating user profile:', error);
     res.status(500).json({ message: 'Server error', error });
   }
-}; 
+};
+
+// Update user profile
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { bio, categories } = req.body;
+
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { userId },
+      { bio, categories },
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    res.json(updatedProfile);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
