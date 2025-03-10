@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import Profile from '../models/Profile.js';
 import jwt from 'jsonwebtoken';
 
 const signToken = (id) => {
@@ -33,6 +34,13 @@ export const signup = async (req, res) => {
       gender,
 
     })
+
+    await Profile.create({
+      userId: newUser._id,
+      bio: '',
+      availability: [],
+      categories: [],
+    });
 
     const token = signToken(newUser._id);
 
