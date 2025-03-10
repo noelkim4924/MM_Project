@@ -1,24 +1,24 @@
-import React from 'react';
-import { useAuthStore } from '../store/useAuthStore';
-import { useNavigate } from 'react-router-dom'; // useNavigate 추가
+import { useEffect } from "react";
+import Sidebar from "../components/Sidebar";
+import { useMatchStore } from "../store/useMatchStore";
+import {Header} from "../components/Header";
 
 const HomePage = () => {
-  const { logout } = useAuthStore();
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const { isLoadingUserProfiles, getUserProfiles, userProfiles } = useMatchStore();
 
-  const handleLogout = () => {
-    console.log("Logout button clicked");
-    logout().then(() => {
-      navigate('/auth', { replace: false }); // push로 이동
-    });
-  };
+  useEffect(() => {
+    getUserProfiles();
+  }, [getUserProfiles]);
 
+  console.log("User Profiles: ", userProfiles);
   return (
-    <div>
-      Homepage
-      <button onClick={handleLogout}>logout</button>
-    </div>
+    <div className='flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden'>
+    <Sidebar />
+    <div className='flex-grow flex flex-col overflow-hidden'>
+				<Header />
+        </div>
+
+      </div>
   );
 };
-
 export default HomePage;

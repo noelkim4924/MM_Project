@@ -26,12 +26,12 @@ const userSchema = new mongoose.Schema({
       enum:['male' ,'female','other']
     },
     image: { type: String, default: "" },
-  // matches: [
-  //   // {
-  //   //   type: mongoose.Schema.Types.ObjectId,
-  //   //   ref: 'User',
-  //   // },
-  // ],  
+  matches: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],  
 },
   ); 
 
