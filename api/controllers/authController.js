@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+
 import jwt from 'jsonwebtoken';
 
 const signToken = (id) => {
@@ -11,9 +12,9 @@ const signToken = (id) => {
 
 export const signup = async (req, res) => {
 
-  const { name, email, password,age,gender } = req.body;
+  const { name, email, password,age,gender,role } = req.body;
   try {
-    if(!name || !email || !password || !age){
+    if(!name || !email || !password || !age|| !gender|| !role){
       return res.status(400).json({
         sucess: false,
         message: 'Please fill in all fields'})
@@ -31,8 +32,10 @@ export const signup = async (req, res) => {
       password,
       age,
       gender,
+      role,
 
     })
+
 
     const token = signToken(newUser._id);
 
