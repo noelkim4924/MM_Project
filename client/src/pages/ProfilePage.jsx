@@ -2,13 +2,11 @@ import { useRef, useState, useEffect } from "react";
 import { Header } from "../components/Header";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
-import { useProfileStore } from "../store/useProfileStore";
-import CategoryDropdown from "../components/CategoryDropdown"; // Import the new component
+import CategoryDropdown from "../components/CategoryDropdown";
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
-  const { profile, fetchProfile, updateProfile: updateProfileStore, loading: profileLoading } = useProfileStore();
-  const { updateProfile: updateUserProfile, loading: userLoading } = useUserStore();
+  const { profile, fetchProfile, updateProfile, loading } = useUserStore();
 
   const [name, setName] = useState(authUser?.name || "");
   const [age, setAge] = useState(authUser?.age || "");
@@ -16,6 +14,7 @@ const ProfilePage = () => {
   const [bio, setBio] = useState("");
   const [categories, setCategories] = useState([]);
   const [image, setImage] = useState(authUser?.image || null);
+  const [role, setRole] = useState("");
 
   const fileInputRef = useRef(null);
 
@@ -27,15 +26,21 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (profile) {
+      setName(profile.name || authUser?.name || "");
+      setAge(profile.age || authUser?.age || "");
+      setGender(profile.gender || authUser?.gender || "");
       setBio(profile.bio || "");
       setCategories(profile.categories || []);
+      setImage(profile.image || authUser?.image || null);
+      setRole(profile.role || "");
     }
-  }, [profile]);
+  }, [profile, authUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await updateUserProfile({ userId: authUser._id, name, age, gender, image });
-    await updateProfileStore(authUser._id, { bio, categories });
+    // age, gender, role은 업데이트에서 제외
+    const updatedData = { name, bio, categories, image };
+    await updateProfile(updatedData);
   };
 
   const handleImageChange = (e) => {
@@ -55,7 +60,7 @@ const ProfilePage = () => {
     setCategories(categories.filter((category) => category !== categoryToRemove));
   };
 
-  if (profileLoading || userLoading) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -75,7 +80,11 @@ const ProfilePage = () => {
               <div className="text-center">
                 {image && (
                   <div className="mt-4 flex justify-center">
-                    <img src={image} alt="User Image" className="w-48 h-48 object-cover rounded-full border-4 border-white drop-shadow-[0px_4px_6px_rgba(0,0,0,0.3)]" />
+                    <img
+                      src={image}
+                      alt="User Image"
+                      className="w-48 h-48 object-cover rounded-full border-4 border-white drop-shadow-[0px_4px_6px_rgba(0,0,0,0.3)]"
+                    />
                   </div>
                 )}
                 <div className="mt-4">
@@ -114,45 +123,30 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* AGE - Dropdown */}
+              {/* AGE - Read Only */}
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">Age</label>
+                <div className="ml-2 text-sm text-red-600">
+                  ✉️ To change age, gender, or role, email the admin.
+                </div>
+              </div>
+            <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
+              {age || "Not set"}
+            </div>
+
+              {/* GENDER - Read Only */}
               <div>
-                <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-                  Age
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="age"
-                    name="age"
-                    value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  >
-                    <option value="">Select Age</option>
-                    <option value="under 18">Under 18</option>
-                    <option value="18">18</option>
-                    <option value="over 18">Over 18</option>
-                  </select>
+                <label className="block text-sm font-medium text-gray-700">Gender</label>
+                <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
+                  {gender || "Not set"}
                 </div>
               </div>
 
-              {/* GENDER - Dropdown */}
+              {/* ROLE - Read Only */}
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-                  Gender
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                  >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
+                <label className="block text-sm font-medium text-gray-700">Role</label>
+                <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
+                  {role || "Not set"}
                 </div>
               </div>
 
@@ -183,9 +177,9 @@ const ProfilePage = () => {
               <button
                 type="submit"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                disabled={profileLoading || userLoading}
+                disabled={loading}
               >
-                {profileLoading || userLoading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save"}
               </button>
             </form>
           </div>

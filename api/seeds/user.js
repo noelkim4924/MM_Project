@@ -22,7 +22,7 @@ const femaleNames = [
   "Lisa",
 ];
 
-// 'other' 성별을 위한 이름 배열 추가 (중성적인 이름 사용)
+
 const otherNames = [
   "Alex",
   "Jordan",
@@ -36,33 +36,33 @@ const otherNames = [
   "Peyton",
 ];
 
-// const bioDescriptors = [
-//   "Coffee addict",
-//   "Cat lover",
-//   "Dog person",
-//   "Foodie",
-//   "Gym rat",
-//   "Bookworm",
-//   "Movie buff",
-//   "Music lover",
-//   "Travel junkie",
-//   "Beach bum",
-//   "City slicker",
-//   "Outdoor enthusiast",
-//   "Netflix binger",
-//   "Yoga enthusiast",
-//   "Craft beer connoisseur",
-//   "Sushi fanatic",
-//   "Adventure seeker",
-//   "Night owl",
-//   "Early bird",
-//   "Aspiring chef",
-// ];
+const bioDescriptors = [
+  "Coffee addict",
+  "Cat lover",
+  "Dog person",
+  "Foodie",
+  "Gym rat",
+  "Bookworm",
+  "Movie buff",
+  "Music lover",
+  "Travel junkie",
+  "Beach bum",
+  "City slicker",
+  "Outdoor enthusiast",
+  "Netflix binger",
+  "Yoga enthusiast",
+  "Craft beer connoisseur",
+  "Sushi fanatic",
+  "Adventure seeker",
+  "Night owl",
+  "Early bird",
+  "Aspiring chef",
+];
 
-// const generateBio = () => {
-//   const descriptors = bioDescriptors.sort(() => 0.5 - Math.random()).slice(0, 3);
-//   return descriptors.join(" | ");
-// };
+const generateBio = () => {
+  const descriptors = bioDescriptors.sort(() => 0.5 - Math.random()).slice(0, 3);
+  return descriptors.join(" | ");
+};
 
 const generateRandomUser = (gender, index) => {
   let names;
