@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 export const useMatchStore = create((set) => ({
-  matches: [], // 초기값 명시
+  matches: [], 
   isLoadingMyMatches: false,
   isLoadingUserProfiles: false,
   userProfiles: [],
@@ -13,7 +13,7 @@ export const useMatchStore = create((set) => ({
     try {
       set({ isLoadingMyMatches: true });
       const res = await axiosInstance.get("/matches");
-      set({ matches: res.data.matches || [] }); // 기본값으로 빈 배열 보장
+      set({ matches: res.data.matches || [] }); 
     } catch (error) {
       set({ matches: [] });
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -26,7 +26,7 @@ export const useMatchStore = create((set) => ({
     try {
       set({ isLoadingUserProfiles: true });
       const res = await axiosInstance.get("/matches/user-profiles");
-      set({ userProfiles: res.data.users || [] }); // 기본값으로 빈 배열 보장
+      set({ userProfiles: res.data.users || [] }); 
     } catch (error) {
       set({ userProfiles: [] });
       toast.error(error.response?.data?.message || "Something went wrong");
