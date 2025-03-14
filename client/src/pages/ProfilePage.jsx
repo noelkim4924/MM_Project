@@ -3,10 +3,12 @@ import { Header } from "../components/Header";
 import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
 import CategoryDropdown from "../components/CategoryDropdown";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
   const { profile, fetchProfile, updateProfile, loading } = useUserStore();
+  const navigate = useNavigate();
 
   const [name, setName] = useState(authUser?.name || "");
   const [age, setAge] = useState(authUser?.age || "");
@@ -14,15 +16,17 @@ const ProfilePage = () => {
   const [bio, setBio] = useState("");
   const [categories, setCategories] = useState([]);
   const [image, setImage] = useState(authUser?.image || null);
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState(authUser?.role || "");
 
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    if (authUser) {
-      fetchProfile(authUser._id);
+    if (!authUser) {
+      navigate("/auth"); 
+      return;
     }
-  }, [authUser, fetchProfile]);
+    fetchProfile(authUser._id);
+  }, [authUser, fetchProfile, navigate]);
 
   useEffect(() => {
     if (profile) {
@@ -32,13 +36,12 @@ const ProfilePage = () => {
       setBio(profile.bio || "");
       setCategories(profile.categories || []);
       setImage(profile.image || authUser?.image || null);
-      setRole(profile.role || "");
+      setRole(profile.role || authUser?.role || "");
     }
   }, [profile, authUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // age, gender, role은 업데이트에서 제외
     const updatedData = { name, bio, categories, image };
     await updateProfile(updatedData);
   };
@@ -64,15 +67,17 @@ const ProfilePage = () => {
     return <div>Loading...</div>;
   }
 
+  if (!authUser) {
+    return null; 
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-
       <div className="flex-grow flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Your Profile</h2>
         </div>
-
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -130,9 +135,9 @@ const ProfilePage = () => {
                   ✉️ To change age, gender, or role, email the admin.
                 </div>
               </div>
-            <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
-              {age || "Not set"}
-            </div>
+              <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
+                {age || "Not set"}
+              </div>
 
               {/* GENDER - Read Only */}
               <div>
@@ -168,11 +173,14 @@ const ProfilePage = () => {
               </div>
 
               {/* CATEGORIES */}
-              <CategoryDropdown
-                selectedCategories={categories}
-                onCategoryChange={handleCategoryChange}
-                onRemoveCategory={removeCategory}
-              />
+              {role === "mentor" && (
+                <CategoryDropdown
+                  selectedCategories={categories}
+                  onCategoryChange={handleCategoryChange}
+                  onRemoveCategory={removeCategory}
+                  role={role}
+                />
+              )}
 
               <button
                 type="submit"
