@@ -3,7 +3,6 @@ import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 import { disconnectSocket, initializeSocket } from '../socket/socket.client';
 
-
 export const useAuthStore = create((set) => ({
   authUser: null,
   checkingAuth: true,

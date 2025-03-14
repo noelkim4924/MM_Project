@@ -8,7 +8,7 @@ const CategoryDropdown = ({ selectedCategories, onCategoryChange, onRemoveCatego
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/categories", {
+        const response = await fetch("http://localhost:5000/api/categories", {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
         });
