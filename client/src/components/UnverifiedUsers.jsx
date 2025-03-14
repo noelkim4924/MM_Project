@@ -3,31 +3,33 @@ import axios from "axios";
 import { CheckCircle, XCircle } from "lucide-react";
 
 const UnverifiedUsers = () => {
-  // 기본값: mentees
-  const [selectedTab, setSelectedTab] = useState("mentees");
   // pending 멘토 목록
   const [mentorList, setMentorList] = useState([]);
   // 로딩 상태
   const [loading, setLoading] = useState(false);
-
-  // ✅ (1) 서브카테고리 맵: { subcategoryId: subcategoryName }
+  // 서브카테고리 맵: { subcategoryId: subcategoryName }
   const [subcategoryMap, setSubcategoryMap] = useState({});
 
-  // ✅ (2) 컴포넌트가 마운트되면, 모든 카테고리(서브카테고리)를 불러와서 subcategoryMap 생성
+  // ─────────────────────────────────────────────────────────
+  // 1) 컴포넌트 마운트 시 한 번에 데이터 불러오기
+  //    - 모든 카테고리(서브카테고리) → subcategoryMap
+  //    - pending 멘토 목록
+  // ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchAllCategories();
+    fetchPendingMentors();
   }, []);
 
+  // ─────────────────────────────────────────────────────────
+  // (A) 모든 카테고리 불러와 subcategoryMap 생성
+  // ─────────────────────────────────────────────────────────
   const fetchAllCategories = async () => {
     try {
-      // CategoryDropdown.jsx에서 쓰는 경로와 동일 ("/api/categories")
-      // 백엔드가 이 경로에서 { success: true, data: [ { _id, name, subcategories: [...] }, ... ] } 형태로 응답
       const res = await axios.get("http://localhost:5001/api/categories", {
         withCredentials: true,
       });
       const catData = res.data.data || [];
 
-      // 새로운 맵 객체: subcategoryId -> subcategoryName
       const newMap = {};
       catData.forEach((catObj) => {
         catObj.subcategories.forEach((sub) => {
@@ -41,14 +43,9 @@ const UnverifiedUsers = () => {
     }
   };
 
-  // 탭이 mentors일 때만, pending 멘토 목록을 불러옴
-  useEffect(() => {
-    if (selectedTab === "mentors") {
-      fetchPendingMentors();
-    }
-    // mentees 탭은 별도 로직이 필요하다면 구현
-  }, [selectedTab]);
-
+  // ─────────────────────────────────────────────────────────
+  // (B) Pending 멘토 목록 불러오기
+  // ─────────────────────────────────────────────────────────
   const fetchPendingMentors = async () => {
     try {
       setLoading(true);
@@ -56,7 +53,6 @@ const UnverifiedUsers = () => {
       const res = await axios.get("http://localhost:5001/api/users/pending-mentors", {
         withCredentials: true,
       });
-      console.log("pending mentors response:", res.data);
       setMentorList(res.data.mentors || []);
     } catch (err) {
       console.error(err);
@@ -66,7 +62,9 @@ const UnverifiedUsers = () => {
     }
   };
 
-  // 승인
+  // ─────────────────────────────────────────────────────────
+  // 2) 카테고리 승인 / 거절
+  // ─────────────────────────────────────────────────────────
   const handleVerify = async (mentorId, categoryId) => {
     try {
       await axios.post("http://localhost:5001/api/users/verify-category", {
@@ -75,8 +73,7 @@ const UnverifiedUsers = () => {
         status: "verified",
       }, { withCredentials: true });
 
-      alert("Category verified successfully.");
-      // 다시 목록 새로고침
+      alert("Category has been verified.");
       fetchPendingMentors();
     } catch (err) {
       console.error(err);
@@ -84,7 +81,6 @@ const UnverifiedUsers = () => {
     }
   };
 
-  // 거절
   const handleDecline = async (mentorId, categoryId) => {
     try {
       await axios.post("http://localhost:5001/api/users/verify-category", {
@@ -93,7 +89,7 @@ const UnverifiedUsers = () => {
         status: "declined",
       }, { withCredentials: true });
 
-      alert("Category declined.");
+      alert("Category has been declined.");
       fetchPendingMentors();
     } catch (err) {
       console.error(err);
@@ -101,45 +97,32 @@ const UnverifiedUsers = () => {
     }
   };
 
+  // ─────────────────────────────────────────────────────────
+  // 3) UI 렌더링
+  // ─────────────────────────────────────────────────────────
   return (
-    <div className="p-6 bg-[#E6E1F2] rounded-lg shadow-lg w-full max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
-        Unverified User List
-      </h2>
-      
-      {/* Mentors / Mentees Tabs */}
-      <div className="flex justify-center space-x-4 mb-6">
-        <button
-          className={`px-6 py-2 rounded-md font-semibold text-lg transition-colors duration-300 ${
-            selectedTab === "mentors" ? "bg-[#B1A1D6] text-white" : "bg-gray-300 text-gray-700"
-          }`}
-          onClick={() => setSelectedTab("mentors")}
-        >
-          mentors
-        </button>
-        <button
-          className={`px-6 py-2 rounded-md font-semibold text-lg transition-colors duration-300 ${
-            selectedTab === "mentees" ? "bg-[#B1A1D6] text-white" : "bg-gray-300 text-gray-700"
-          }`}
-          onClick={() => setSelectedTab("mentees")}
-        >
-          mentees
-        </button>
-      </div>
+    <div className="p-6 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+          Pending Mentor Category Verification
+        </h2>
 
-      {selectedTab === "mentors" && (
+        {loading && (
+          <div className="text-center text-gray-700 mb-4">Loading mentors...</div>
+        )}
+
+        {!loading && mentorList.length === 0 && (
+          <div className="text-center text-gray-600">No pending mentor categories found.</div>
+        )}
+
+        {/* 멘토 리스트 */}
         <div className="space-y-4">
-          {loading && <div>Loading mentors...</div>}
-          {!loading && mentorList.length === 0 && (
-            <div>No mentors with pending categories.</div>
-          )}
-
           {mentorList.map((mentor) => (
             <div
               key={mentor._id}
-              className="flex flex-col bg-[#C3B7E7] p-4 rounded-lg shadow-md mb-4"
+              className="flex flex-col bg-purple-100 p-4 rounded-lg shadow-md"
             >
-              {/* Mentor info */}
+              {/* Mentor Info */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
@@ -154,30 +137,31 @@ const UnverifiedUsers = () => {
                 </button>
               </div>
 
-              {/* mentor.categories: pending인 것들 */}
-              <div className="mt-2 space-y-2">
+              {/* 멘토의 pending 카테고리들 */}
+              <div className="mt-3 space-y-2">
                 {mentor.categories.map((cat) => {
-                  // ✅ subcategoryMap에서 이름 찾기
-                  // cat.categoryId -> 실제 subcategory의 이름
+                  // subcategoryMap에서 카테고리 이름 찾기
                   const catName = subcategoryMap[cat.categoryId] || "Unknown Category";
                   return (
                     <div
                       key={cat.categoryId}
                       className="flex items-center justify-between bg-white p-2 rounded-md"
                     >
-                      <span className="text-gray-800">
-                        {catName} - Status: {cat.status}
-                      </span>
+                      {/* ✅ 'Status: pending' 문구는 제거, 이름만 표시 */}
+                      <span className="text-gray-800 font-medium">{catName}</span>
+
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleDecline(mentor._id, cat.categoryId)}
                           className="text-red-500 hover:text-red-700"
+                          title="Decline"
                         >
                           <XCircle size={24} />
                         </button>
                         <button
                           onClick={() => handleVerify(mentor._id, cat.categoryId)}
                           className="text-green-500 hover:text-green-700"
+                          title="Verify"
                         >
                           <CheckCircle size={24} />
                         </button>
@@ -189,7 +173,7 @@ const UnverifiedUsers = () => {
             </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 };
