@@ -1,6 +1,120 @@
 import cloudinary from '../config/cloudinary.js';
 import User from '../models/User.js';
 
+// userController.js (추가)
+
+// userController.js
+
+export const getAllUsers = async (req, res) => {
+  console.log("getAllUsers called with query:", req.query);
+  try {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+
+    const { search, role, page = 1 } = req.query; 
+    // page가 문자열로 올 테니, 숫자로 변환
+    const pageNumber = parseInt(page) || 1;
+    const pageSize = 20; // 한 페이지에 20명
+
+    let filter = {};
+
+    // role이 mentor 또는 mentee 인 경우 필터
+    if (role === 'mentor' || role === 'mentee') {
+      filter.role = role;
+    }
+
+    // 이름/이메일 검색
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // 총 유저 수(페이지네이션용)
+    const totalCount = await User.countDocuments(filter);
+
+    // 페이지네이션
+    // 예: page=1이면 skip=0, page=2면 skip=20, ...
+    const skip = (pageNumber - 1) * pageSize;
+
+    // 유저 목록
+    const users = await User.find(filter)
+      .select('name email role') // 필요 필드만
+      .skip(skip)
+      .limit(pageSize)
+      .sort({ createdAt: -1 }); // 정렬은 예시
+
+      const currentPage = pageNumber;
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      return res.status(200).json({
+        success: true,
+        data: users,
+        totalCount,
+        currentPage,
+        totalPages,
+      });
+  } catch (error) {
+    console.error("Error in getAllUsers:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+// userController.js (추가)
+
+export const adminUpdateUser = async (req, res) => {
+  try {
+    const { userId } = req.params; // URL 파라미터
+    const { name, age, gender, role, resetImage } = req.body;
+    // resetImage === true 면, 프로필사진을 avatar.png 로 강제 변경
+
+    // 1) DB에서 해당 유저 찾기
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // 2) 수정 가능한 필드만 업데이트
+    if (name !== undefined) user.name = name;
+    if (age !== undefined) user.age = age; 
+    if (gender !== undefined) user.gender = gender;
+    if (role !== undefined) user.role = role;
+
+    // “부적절한 프로필 사진” → resetImage = true 일 경우 avatar.png로 교체
+    if (resetImage) {
+      user.image = "/avatar.png"; // 또는 실제 CDN 경로
+    }
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "User updated by admin successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error in adminUpdateUser:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const adminGetUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // 관리자이므로 protectRoute나 isAdmin 체크만 통과하면 누구든 조회 가능
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    return res.json({ success: true, data: user });
+  } catch (error) {
+    console.error('Error in adminGetUserProfile:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
 export const getUserProfile = async (req, res) => {
   try {
     const { userId } = req.params;

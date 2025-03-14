@@ -75,7 +75,7 @@ const UnverifiedUsers = () => {
             categoryId,
             status: "verified",
           }, { withCredentials: true });
-          toast.success("Category has been verified.");
+          toast.success("Category has been verified.");
           fetchPendingMentors();
         } catch (err) {
           console.error(err);

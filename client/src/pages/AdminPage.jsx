@@ -16,8 +16,6 @@ const AdminPage = () => {
         return <UnverifiedUsers />;
       case "management":
         return <UserManagement />;
-      case "reports":
-        return <Reports />;
       case "history":
         return <UserHistory />;
       default:
