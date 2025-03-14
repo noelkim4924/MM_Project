@@ -17,12 +17,8 @@ import { initializeSocket } from "./socket/socket.server.js";
 dotenv.config();
 
 const app = express();
-<<<<<<< HEAD
-const PORT = process.env.PORT || 5001;
-=======
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 5000;
->>>>>>> cat_set
+const PORT = process.env.PORT || 5001;
 
 // 환경 변수 로드 확인
 console.log("CLIENT_URL:", process.env.CLIENT_URL);

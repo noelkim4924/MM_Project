@@ -17,7 +17,7 @@ export const getUserProfile = async (req, res) => {
 
 export const createUserProfile = async (req, res) => {
   try {
-    const { name, email, password, age, gender,role, bio, availability, categories } = req.body;
+    const { name, email, password, age, gender, role, bio, availability, categories } = req.body;
     if (!name || !email || !password || !age || !gender || !role) {
       return res.status(400).json({ message: 'Required fields missing' });
     }
@@ -26,6 +26,12 @@ export const createUserProfile = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
+
+    // ✅ 카테고리는 자동으로 `pending` 상태로 저장
+    const formattedCategories = categories.map((catId) => ({
+      categoryId: catId,
+      status: 'pending',
+    }));
 
     const newUser = await User.create({
       name,
@@ -36,7 +42,7 @@ export const createUserProfile = async (req, res) => {
       role,
       bio: bio || '',
       availability: availability || [],
-      categories: categories || [],
+      categories: formattedCategories,
     });
 
     res.status(201).json(newUser);
@@ -49,7 +55,46 @@ export const createUserProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { image, bio, availability, categories, ...otherData } = req.body;
-    let updatedData = { bio, availability, categories, ...otherData };
+    let updatedData = { bio, availability, ...otherData };
+
+    // 1) 현재 DB에서 사용자 조회
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // 2) DB에 저장된 기존 categories
+    const oldCategories = user.categories || []; 
+    // oldCategories: [{ categoryId, status }, ...]
+
+    // 3) 프론트에서 넘어온 최종 categories
+    //    예: [{ categoryId: "xxxx", status: "pending" }, ...]
+    const incomingCategories = categories || [];
+
+    // 4) 최종 반영할 배열을 만든다.
+    //    (새로 추가된 항목은 pending, 기존 항목은 기존 status 유지)
+    const finalCategories = incomingCategories.map((catObj) => {
+      // 기존에 존재하던 항목인지 확인
+      const oldCat = oldCategories.find(
+        (o) => o.categoryId === catObj.categoryId
+      );
+      if (oldCat) {
+        // 기존에 있던 카테고리는 원래 status를 유지
+        return {
+          categoryId: oldCat.categoryId,
+          status: oldCat.status,
+        };
+      } else {
+        // 새로 추가된 항목은 'pending'으로
+        return {
+          categoryId: catObj.categoryId,
+          status: 'pending',
+        };
+      }
+    });
+
+    // 5) user.categories를 최종 배열로 교체
+    updatedData.categories = finalCategories;
 
     if (image && image.startsWith("data:image")) {
       try {
@@ -64,6 +109,7 @@ export const updateProfile = async (req, res) => {
       }
     }
 
+    // 7) DB 업데이트
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       updatedData,
@@ -74,16 +120,99 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       data: updatedUser,
     });
   } catch (error) {
     console.log("Error in updateProfile controller: ", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Internal Server Error',
     });
   }
 };
+
+export const verifyMentorCategory = async (req, res) => {
+  try {
+    const { mentorId, categoryId, status } = req.body; // 어드민이 보낸 데이터
+
+    if (!['verified', 'declined'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status. Use 'verified' or 'declined'." });
+    }
+
+    const mentor = await User.findById(mentorId);
+    if (!mentor) {
+      return res.status(404).json({ message: 'Mentor not found' });
+    }
+
+    const categoryIndex = mentor.categories.findIndex(cat => cat.categoryId.toString() === categoryId);
+    if (categoryIndex === -1) {
+      return res.status(404).json({ message: 'Category not found in mentor profile' });
+    }
+
+    mentor.categories[categoryIndex].status = status;
+    await mentor.save();
+
+    res.status(200).json({ success: true, message: `Category ${status} successfully.` });
+  } catch (error) {
+    console.error('Error in verifyMentorCategory:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
+export const requestCategoryVerification = async (req, res) => {
+  try {
+    // 현재 로그인한 사용자 정보 가져오기
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // pending 상태의 카테고리가 하나라도 있는지 확인
+    const hasPending = user.categories.some(cat => cat.status === 'pending');
+    if (!hasPending) {
+      return res.status(400).json({ message: 'There are no categories to verify.' });
+    }
+
+    // 여기서는 실제로 관리자에게 알림을 보내는 로직 대신, 
+    // 단순히 "요청이 접수되었습니다" 메시지를 반환
+    return res.status(200).json({ message: 'Verification request sent to admin.' });
+  } catch (error) {
+    console.error('Error in requestCategoryVerification:', error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+// userController.js
+// 관리자 전용: pending 상태 카테고리가 있는 멘토 목록 가져오기
+// userController.js
+export const getPendingMentors = async (req, res) => {
+  try {
+    const mentors = await User.find({
+      role: 'mentor',
+      'categories.status': 'pending'
+    }).select('name email categories');
+
+    // ✅ 콘솔로 찍어보기
+    console.log("getPendingMentors() -> mentors:", mentors);
+
+    const result = mentors.map(mentor => {
+      const pendingCats = mentor.categories.filter(cat => cat.status === 'pending');
+      return {
+        _id: mentor._id,
+        name: mentor.name,
+        email: mentor.email,
+        categories: pendingCats, 
+      };
+    });
+
+    return res.status(200).json({ mentors: result });
+  } catch (error) {
+    console.error('Error in getPendingMentors:', error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
