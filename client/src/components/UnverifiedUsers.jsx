@@ -1,28 +1,31 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Mail } from "lucide-react";
+import ConfirmToast from "../components/ConfirmToast";
+import { toast } from "react-hot-toast";  // <-- 새 컴포넌트 import
 
 const UnverifiedUsers = () => {
   // pending 멘토 목록
   const [mentorList, setMentorList] = useState([]);
-  // 로딩 상태
   const [loading, setLoading] = useState(false);
-  // 서브카테고리 맵: { subcategoryId: subcategoryName }
   const [subcategoryMap, setSubcategoryMap] = useState({});
+  const defaultImage = "/avatar.png";
+
+  const [confirmState, setConfirmState] = useState({
+    open: false,
+    type: "verify", // or "decline"
+    message: "",
+    onConfirm: null,
+  });
 
   // ─────────────────────────────────────────────────────────
-  // 1) 컴포넌트 마운트 시 한 번에 데이터 불러오기
-  //    - 모든 카테고리(서브카테고리) → subcategoryMap
-  //    - pending 멘토 목록
+  // 1) 데이터 불러오기
   // ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchAllCategories();
     fetchPendingMentors();
   }, []);
 
-  // ─────────────────────────────────────────────────────────
-  // (A) 모든 카테고리 불러와 subcategoryMap 생성
-  // ─────────────────────────────────────────────────────────
   const fetchAllCategories = async () => {
     try {
       const res = await axios.get("http://localhost:5001/api/categories", {
@@ -43,62 +46,80 @@ const UnverifiedUsers = () => {
     }
   };
 
-  // ─────────────────────────────────────────────────────────
-  // (B) Pending 멘토 목록 불러오기
-  // ─────────────────────────────────────────────────────────
   const fetchPendingMentors = async () => {
     try {
       setLoading(true);
-      // 백엔드: GET /users/pending-mentors
       const res = await axios.get("http://localhost:5001/api/users/pending-mentors", {
         withCredentials: true,
       });
       setMentorList(res.data.mentors || []);
     } catch (err) {
       console.error(err);
-      // 에러처리 (toast 등) 가능
     } finally {
       setLoading(false);
     }
   };
 
   // ─────────────────────────────────────────────────────────
-  // 2) 카테고리 승인 / 거절
+  // 2) "Verify" / "Decline" 버튼 클릭 시 → confirmState 열기
   // ─────────────────────────────────────────────────────────
-  const handleVerify = async (mentorId, categoryId) => {
-    try {
-      await axios.post("http://localhost:5001/api/users/verify-category", {
-        mentorId,
-        categoryId,
-        status: "verified",
-      }, { withCredentials: true });
-
-      alert("Category has been verified.");
-      fetchPendingMentors();
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Something went wrong");
-    }
+  const handleVerify = (mentorId, categoryId) => {
+    setConfirmState({
+      open: true,
+      type: "verify", // ✅ 확인일 때
+      message: "Are you sure you want to verify this category?",
+      onConfirm: async () => {
+        try {
+          await axios.post("http://localhost:5001/api/users/verify-category", {
+            mentorId,
+            categoryId,
+            status: "verified",
+          }, { withCredentials: true });
+          toast.success("Category has been verified.");
+          fetchPendingMentors();
+        } catch (err) {
+          console.error(err);
+          alert(err.response?.data?.message || "Something went wrong");
+        }
+      },
+    });
   };
 
-  const handleDecline = async (mentorId, categoryId) => {
-    try {
-      await axios.post("http://localhost:5001/api/users/verify-category", {
-        mentorId,
-        categoryId,
-        status: "declined",
-      }, { withCredentials: true });
+  const handleDecline = (mentorId, categoryId) => {
+    setConfirmState({
+      open: true,
+      type: "decline", // ✅ 거절일 때
+      message: "Are you sure you want to decline this category?",
+      onConfirm: async () => {
+        try {
+          await axios.post("http://localhost:5001/api/users/verify-category", {
+            mentorId,
+            categoryId,
+            status: "declined",
+          }, { withCredentials: true });
+          toast.success("Category has been declined.");
+          fetchPendingMentors();
+        } catch (err) {
+          console.error(err);
+          alert(err.response?.data?.message || "Something went wrong");
+        }
+      },
+    });
+  };
 
-      alert("Category has been declined.");
-      fetchPendingMentors();
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Something went wrong");
+  const closeConfirm = () => {
+    setConfirmState({ ...confirmState, open: false });
+  };
+
+  const confirmYes = async () => {
+    if (confirmState.onConfirm) {
+      await confirmState.onConfirm();
     }
+    setConfirmState({ ...confirmState, open: false });
   };
 
   // ─────────────────────────────────────────────────────────
-  // 3) UI 렌더링
+  // 3) UI
   // ─────────────────────────────────────────────────────────
   return (
     <div className="p-6 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
@@ -117,63 +138,82 @@ const UnverifiedUsers = () => {
 
         {/* 멘토 리스트 */}
         <div className="space-y-4">
-          {mentorList.map((mentor) => (
-            <div
-              key={mentor._id}
-              className="flex flex-col bg-purple-100 p-4 rounded-lg shadow-md"
-            >
-              {/* Mentor Info */}
-              <div className="flex items-center justify-between">
+          {mentorList.map((mentor) => {
+            const profileImage = mentor.image || defaultImage;
+            return (
+              <div
+                key={mentor._id}
+                className="flex flex-col bg-purple-100 p-4 rounded-lg shadow-md"
+              >
+                {/* Mentor Info */}
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 text-lg">👤</span>
-                  </div>
-                  <span className="font-semibold text-lg text-gray-900">
-                    {mentor.name} ({mentor.email})
-                  </span>
-                </div>
-                <button className="px-4 py-1 bg-white text-gray-900 font-semibold rounded-md shadow-md">
-                  detail
-                </button>
-              </div>
+                  {/* 프로필 이미지 */}
+                  <img
+                    src={profileImage}
+                    alt="User Avatar"
+                    className="w-14 h-14 object-cover rounded-full border-4 border-white drop-shadow-[0px_4px_6px_rgba(0,0,0,0.3)]"
+                  />
 
-              {/* 멘토의 pending 카테고리들 */}
-              <div className="mt-3 space-y-2">
-                {mentor.categories.map((cat) => {
-                  // subcategoryMap에서 카테고리 이름 찾기
-                  const catName = subcategoryMap[cat.categoryId] || "Unknown Category";
-                  return (
-                    <div
-                      key={cat.categoryId}
-                      className="flex items-center justify-between bg-white p-2 rounded-md"
-                    >
-                      {/* ✅ 'Status: pending' 문구는 제거, 이름만 표시 */}
-                      <span className="text-gray-800 font-medium">{catName}</span>
-
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleDecline(mentor._id, cat.categoryId)}
-                          className="text-red-500 hover:text-red-700"
-                          title="Decline"
-                        >
-                          <XCircle size={24} />
-                        </button>
-                        <button
-                          onClick={() => handleVerify(mentor._id, cat.categoryId)}
-                          className="text-green-500 hover:text-green-700"
-                          title="Verify"
-                        >
-                          <CheckCircle size={24} />
-                        </button>
-                      </div>
+                  {/* 이름 + 이메일 */}
+                  <div className="flex flex-col">
+                    {/* 이름 */}
+                    <span className="font-semibold text-lg text-gray-900">
+                      {mentor.name}
+                    </span>
+                    {/* 이메일 */}
+                    <div className="flex items-center space-x-1 text-gray-600 text-sm mt-1">
+                      <Mail size={16} />
+                      <span>{mentor.email}</span>
                     </div>
-                  );
-                })}
+                  </div>
+                </div>
+
+                {/* 멘토의 pending 카테고리들 */}
+                <div className="mt-3 space-y-2">
+                  {mentor.categories.map((cat) => {
+                    const catName = subcategoryMap[cat.categoryId] || "Unknown Category";
+                    return (
+                      <div
+                        key={cat.categoryId}
+                        className="flex items-center justify-between bg-white p-2 rounded-md"
+                      >
+                        <span className="text-gray-800 font-medium">{catName}</span>
+
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleDecline(mentor._id, cat.categoryId)}
+                            className="text-red-500 hover:text-red-700"
+                            title="Decline"
+                          >
+                            <XCircle size={24} />
+                          </button>
+                          <button
+                            onClick={() => handleVerify(mentor._id, cat.categoryId)}
+                            className="text-green-500 hover:text-green-700"
+                            title="Verify"
+                          >
+                            <CheckCircle size={24} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
+      {/* ConfirmToast */}
+      {confirmState.open && (
+        <ConfirmToast
+          type={confirmState.type}       // verify or decline
+          message={confirmState.message}
+          onConfirm={confirmYes}
+          onCancel={closeConfirm}
+        />
+      )}
     </div>
   );
 };

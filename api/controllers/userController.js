@@ -187,16 +187,14 @@ export const requestCategoryVerification = async (req, res) => {
 };
 
 // userController.js
-// 관리자 전용: pending 상태 카테고리가 있는 멘토 목록 가져오기
-// userController.js
 export const getPendingMentors = async (req, res) => {
   try {
+    // image 필드도 포함
     const mentors = await User.find({
       role: 'mentor',
       'categories.status': 'pending'
-    }).select('name email categories');
+    }).select('name email image categories');
 
-    // ✅ 콘솔로 찍어보기
     console.log("getPendingMentors() -> mentors:", mentors);
 
     const result = mentors.map(mentor => {
@@ -205,6 +203,7 @@ export const getPendingMentors = async (req, res) => {
         _id: mentor._id,
         name: mentor.name,
         email: mentor.email,
+        image: mentor.image,        // 추가
         categories: pendingCats, 
       };
     });
@@ -215,4 +214,5 @@ export const getPendingMentors = async (req, res) => {
     return res.status(500).json({ message: 'Server error', error });
   }
 };
+
 
