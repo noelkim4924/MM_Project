@@ -25,7 +25,16 @@ const userSchema = new mongoose.Schema({
     required: true,
       enum:['male' ,'female','other']
     },
+  role: {
+    type: String,
+    required: true,
+    enum: ['mentor', 'mentee'],
+    },
     image: { type: String, default: "" },
+    bio: { type: String, default: "" },
+    availability: { type: [String], default: [] },
+    categories: { type: [String], default: [] },
+
   matches: [
     {
       type: mongoose.Schema.Types.ObjectId,

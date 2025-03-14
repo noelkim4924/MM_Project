@@ -1,113 +1,100 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import User from "../models/User.js";
-import dotenv from "dotenv";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import User from '../models/User.js';
+import Category from '../models/Category.js';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const maleNames = ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas"];
 
-const femaleNames = [
-  "Mary",
-  "Patricia",
-  "Jennifer",
-  "Linda",
-  "Elizabeth",
-  "Barbara",
-  "Susan",
-  "Jessica",
-  "Sarah",
-  "Karen",
-  "Nancy",
-  "Lisa",
+dotenv.config({ path: path.resolve(__dirname, '../../', '.env') });
+
+const maleNames = ['James', 'John']; 
+const femaleNames = ['Mary', 'Patricia']; 
+const otherNames = ['Alex']; 
+
+const bioDescriptors = [
+  'Coffee addict', 'Cat lover', 'Dog person', 'Foodie', 'Gym rat', 'Bookworm', 'Movie buff', 'Music lover',
+  'Travel junkie', 'Beach bum', 'City slicker', 'Outdoor enthusiast', 'Netflix binger', 'Yoga enthusiast',
+  'Craft beer connoisseur', 'Sushi fanatic', 'Adventure seeker', 'Night owl', 'Early bird', 'Aspiring chef',
 ];
 
-// 'other' 성별을 위한 이름 배열 추가 (중성적인 이름 사용)
-const otherNames = [
-  "Alex",
-  "Jordan",
-  "Taylor",
-  "Casey",
-  "Morgan",
-  "Riley",
-  "Avery",
-  "Skyler",
-  "Quinn",
-  "Peyton",
-];
+const generateBio = () => {
+  const descriptors = bioDescriptors.sort(() => 0.5 - Math.random()).slice(0, 3);
+  return descriptors.join(' | ');
+};
 
-// const bioDescriptors = [
-//   "Coffee addict",
-//   "Cat lover",
-//   "Dog person",
-//   "Foodie",
-//   "Gym rat",
-//   "Bookworm",
-//   "Movie buff",
-//   "Music lover",
-//   "Travel junkie",
-//   "Beach bum",
-//   "City slicker",
-//   "Outdoor enthusiast",
-//   "Netflix binger",
-//   "Yoga enthusiast",
-//   "Craft beer connoisseur",
-//   "Sushi fanatic",
-//   "Adventure seeker",
-//   "Night owl",
-//   "Early bird",
-//   "Aspiring chef",
-// ];
-
-// const generateBio = () => {
-//   const descriptors = bioDescriptors.sort(() => 0.5 - Math.random()).slice(0, 3);
-//   return descriptors.join(" | ");
-// };
-
-const generateRandomUser = (gender, index) => {
+const generateRandomMentor = async (gender, index) => {
   let names;
-  if (gender === "male") {
-    names = maleNames;
-  } else if (gender === "female") {
-    names = femaleNames;
-  } else {
-    names = otherNames;
-  }
+  if (gender === 'male') names = maleNames;
+  else if (gender === 'female') names = femaleNames;
+  else names = otherNames;
 
-  const name = names[index];
-  // age를 enum 값 중 무작위로 선택
+  const name = names[index % names.length];
   const ageOptions = ['under 18', '18', 'over 18'];
   const age = ageOptions[Math.floor(Math.random() * ageOptions.length)];
+  const email = `${name.toLowerCase()}${age.toLowerCase().replace(/\s/g, '')}${Math.floor(Math.random() * 1000)}@example.com`;
+
+  const categoryDoc = await Category.findOne({});
+  if (!categoryDoc) throw new Error('No categories found');
+  const categories = categoryDoc.categories;
+
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  const subcategories = randomCategory.subcategories;
+
+  const mentorCategories = Array.from(
+    { length: Math.floor(Math.random() * 3) + 1 },
+    () => subcategories[Math.floor(Math.random() * subcategories.length)]._id
+  );
+
   return {
     name,
-    email: `${name.toLowerCase()}${age.toLowerCase().replace(/\s/g, '')}@example.com`, // email에 age 포함, 공백 제거
-    password: bcrypt.hashSync("password123", 10),
+    email,
+    password: bcrypt.hashSync('password123', 10),
     age,
     gender,
-    image: "",
+    role: 'mentor',
+    image: '',
+    bio: generateBio(),
+    availability: ['Monday', 'Wednesday', 'Friday'],
+    categories: mentorCategories,
+    matches: [],
   };
 };
 
-const seedUsers = async () => {
+const seedMentors = async () => {
   try {
+    console.log('MONGO_URI:', process.env.MONGO_URI);
     await mongoose.connect(process.env.MONGO_URI);
+    console.log('MongoDB Connected for seeding mentors');
+
 
     await User.deleteMany({});
 
-    const maleUsers = maleNames.map((_, i) => generateRandomUser("male", i));
-    const femaleUsers = femaleNames.map((_, i) => generateRandomUser("female", i));
-    const otherUsers = otherNames.map((_, i) => generateRandomUser("other", i));
 
-    const allUsers = [...maleUsers, ...femaleUsers, ...otherUsers];
+    const maleMentors = await Promise.all(
+      maleNames.map((_, i) => generateRandomMentor('male', i))
+    );
+    const femaleMentors = await Promise.all(
+      femaleNames.map((_, i) => generateRandomMentor('female', i))
+    );
+    const otherMentors = await Promise.all(
+      otherNames.map((_, i) => generateRandomMentor('other', i))
+    );
 
-    await User.insertMany(allUsers);
+    const allMentors = [...maleMentors, ...femaleMentors, ...otherMentors];
 
-    console.log("Database seeded successfully with users");
+    await User.insertMany(allMentors);
+    console.log('Database seeded successfully with 5 mentors');
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error('Error seeding database:', error.message);
   } finally {
-    mongoose.disconnect();
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed');
   }
 };
 
-seedUsers();
+seedMentors();

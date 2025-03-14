@@ -7,17 +7,16 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
+  const [role, setRole] = useState(""); // role 상태 추가
 
   const { signup, loading } = useAuthStore();
-
-
 
   return (
     <form
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        signup({ name, email, password, gender, age });
+        signup({ name, email, password, gender, age, role }); // role 추가
       }}
     >
       {/* NAME */}
@@ -169,6 +168,41 @@ const SignUpForm = () => {
             />
             <label htmlFor="other" className="ml-2 block text-sm text-gray-900">
               Other
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* ROLE */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Your Role</label>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center">
+            <input
+              id="mentor"
+              name="role"
+              type="radio"
+              value="mentor"
+              checked={role === "mentor"}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+            />
+            <label htmlFor="mentor" className="ml-2 block text-sm text-gray-900">
+              Mentor
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              id="mentee"
+              name="role"
+              type="radio"
+              value="mentee"
+              checked={role === "mentee"}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+            />
+            <label htmlFor="mentee" className="ml-2 block text-sm text-gray-900">
+              Mentee
             </label>
           </div>
         </div>

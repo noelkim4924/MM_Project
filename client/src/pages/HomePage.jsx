@@ -14,12 +14,14 @@ const HomePage = () => {
     getUserProfiles();
   }, [getUserProfiles]);
 
-  // 🟢 어드민이면 자동으로 /admin으로 이동
+  // 🟢 어드민이면 자동으로 /admin으로 이동 (admin 브랜치 기능 유지)
   useEffect(() => {
     if (authUser?.name === "admin") {
-      navigate("/admin"); 
+      navigate("/admin");
     }
   }, [authUser, navigate]);
+
+  console.log("User Profiles: ", userProfiles); // ✅ cat_set 브랜치 기능 유지
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
