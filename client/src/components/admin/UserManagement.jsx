@@ -35,7 +35,7 @@ const UserManagement = () => {
     console.log("fetchUsers called with", page, role, searchValue);
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/users/admin/users", {
+      const res = await axios.get("http://localhost:5001/api/users/admin/users", {
         params: {
           role,
           search: searchValue,
