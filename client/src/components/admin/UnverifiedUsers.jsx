@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle, Mail } from "lucide-react";
-import ConfirmToast from "../components/ConfirmToast";
+import ConfirmToast from "./ConfirmToast";
 import { toast } from "react-hot-toast";
 
 const UnverifiedUsers = () => {

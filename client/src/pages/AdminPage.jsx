@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { Header } from "../components/Header";
-import UnverifiedUsers from "../components/UnverifiedUsers";
-import UserManagement from "../components/UserManagement";
-import Reports from "../components/Reports";
-import UserHistory from "../components/UserHistory";
+import UnverifiedUsers from "../components/admin/UnverifiedUsers";
+import UserManagement from "../components/admin/UserManagement";
+import Reports from "../components/admin/Reports";
+import UserHistory from "../components/admin/UserHistory";
 
 const AdminPage = () => {
   const [selectedTab, setSelectedTab] = useState("unverified"); // 🟢 선택된 탭 상태 관리
