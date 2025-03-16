@@ -83,36 +83,47 @@ export const getMatches = async (req, res) => {
   }
 };
 
+// matchController.js
+
 export const getUserProfiles = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user._id);
-    // query 파라미터에서 category와 role 읽기
     const { category, role } = req.query;
-    
+
     // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
     const conditions = [
       { _id: { $ne: currentUser._id } },
       { _id: { $nin: currentUser.matches } }
     ];
-    
-    // role이 제공되면 필터링
+
+    // role이 제공되면 필터링 (mentor or mentee)
     if (role) {
       conditions.push({ role });
     }
-    // category(세부 카테고리 _id)가 제공되면, 유저의 categories 배열에 해당 값이 포함되어야 함
+
+    // ✅ category(서브카테고리 _id)가 제공되면,
+    // "categories" 배열 중에 { categoryId: category, status: 'verified' }가 있어야 함
     if (category) {
-      conditions.push({ categories: category });
+      conditions.push({
+        categories: {
+          $elemMatch: {
+            categoryId: category,
+            status: "verified", // 🔑 verified 필터 추가
+          },
+        },
+      });
     }
-    
+
+    // 최종 검색
     const users = await User.find({ $and: conditions });
-    
-    res.status(200).json({
+
+    return res.status(200).json({
       success: true,
       users,
     });
   } catch (error) {
     console.log("Error in getUserProfiles controller: ", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });

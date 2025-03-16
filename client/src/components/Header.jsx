@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User, LogOut, Menu } from "lucide-react"; 
 
 export  const Header = () => {
@@ -8,6 +8,7 @@ export  const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate(); // <-- 추가
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -114,14 +115,14 @@ export  const Header = () => {
                   Profile
                 </Link>
                 <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className='block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-green-700'
-                >
-                  Logout
-                </button>
+          onClick={() => {
+            logout();
+            navigate("/auth"); // <-- 로그아웃 후 즉시 /auth 이동
+          }}
+        >
+          <LogOut size={16} />
+          Logout
+        </button>
               </>
             ) : (
               <>

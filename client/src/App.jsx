@@ -28,7 +28,19 @@ function App() {
   return (
     <div className="absolute inset-0 -z-10 h-full w-full bg-white">
       <Routes>
-        <Route path="/" element={authUser?.name === "admin" ? <Navigate to="/admin" /> : <HomePage />} />
+      <Route
+  path="/"
+  element={
+    !authUser
+      ? // 유저가 null이면 로그인 화면으로
+        <Navigate to="/auth" />
+      : authUser.name === "admin"
+      ? // admin이면 /admin
+        <Navigate to="/admin" />
+      : // 멘토/멘티 등 일반 유저면 HomePage
+        <HomePage />
+  }
+/>
         <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/" />} />
         <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} />
         <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} />
