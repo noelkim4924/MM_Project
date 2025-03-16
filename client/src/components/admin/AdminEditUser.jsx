@@ -16,7 +16,7 @@ const AdminEditUser = () => {
   const fetchUserDetail = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5001/api/users/admin/users/${userId}`, {
+      const res = await axios.get(`http://localhost:5000/api/users/admin/users/${userId}`, {
         withCredentials: true,
       });
       if (res.data.success) {
@@ -35,7 +35,7 @@ const AdminEditUser = () => {
   // 예: "Reset Image" 버튼, "Update" 버튼 등 관리자 기능
   const handleResetImage = async () => {
     try {
-      await axios.put(`http://localhost:5001/api/users/admin/users/${userId}`, {
+      await axios.put(`http://localhost:5000/api/users/admin/users/${userId}`, {
         resetImage: true,
       }, { withCredentials: true });
       toast.success("Image reset to default");
