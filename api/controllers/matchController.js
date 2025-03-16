@@ -1,4 +1,4 @@
-// api/controllers/matchController.js
+
 import User from "../models/User.js";
 import ChatRequest from "../models/ChatRequest.js";
 import { getIO, getConnectedUsers } from "../socket/socket.server.js";
@@ -108,54 +108,48 @@ export const getUserProfiles = async (req, res) => {
     const currentUser = await User.findById(req.user._id);
     const { category, role } = req.query;
     const userId = req.user._id;
-
-    const users = await User.find({
-      role: role || "mentor",
-      categories: category,
-      _id: { $ne: userId },
-      matches: { $nin: [userId] },
-    }).select("name image age");
-
-    res.status(200).json({ users });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch user profiles", error: err.message });
-
-    // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
-    const conditions = [
-      { _id: { $ne: currentUser._id } },
-      { _id: { $nin: currentUser.matches } }
-    ];
-
-    // role이 제공되면 필터링 (mentor or mentee)
-    if (role) {
-      conditions.push({ role });
-    }
-
-    // ✅ category(서브카테고리 _id)가 제공되면,
-    // "categories" 배열 중에 { categoryId: category, status: 'verified' }가 있어야 함
-    if (category) {
-      conditions.push({
-        categories: {
-          $elemMatch: {
-            categoryId: category,
-            status: "verified", // 🔑 verified 필터 추가
+    
+    let users;
+    try {
+      // 기본 쿼리: 조건에 맞는 멘토(또는 role이 지정된 사용자) 검색
+      users = await User.find({
+        role: role || "mentor",
+        categories: category,
+        _id: { $ne: userId },
+        matches: { $nin: [userId] },
+      }).select("name image age");
+    } catch (err) {
+      console.error("Primary query failed, falling back to alternative query", err);
+      // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
+      const conditions = [
+        { _id: { $ne: currentUser._id } },
+        { _id: { $nin: currentUser.matches } },
+      ];
+      // role이 제공되면 필터링 (mentor 또는 mentee)
+      if (role) {
+        conditions.push({ role });
+      }
+      // category가 제공되면, categories 배열 내에 { categoryId: category, status: 'verified' } 조건 추가
+      if (category) {
+        conditions.push({
+          categories: {
+            $elemMatch: {
+              categoryId: category,
+              status: "verified",
+            },
           },
-        },
-      });
+        });
+      }
+      users = await User.find({ $and: conditions });
     }
-
-    // 최종 검색
-    const users = await User.find({ $and: conditions });
-
-    return res.status(200).json({
-      success: true,
-      users,
-    });
+    
+    return res.status(200).json({ users });
   } catch (error) {
     console.log("Error in getUserProfiles controller: ", error);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
