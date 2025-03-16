@@ -39,7 +39,7 @@ function App() {
   element={
     !authUser
       ? // 유저가 null이면 로그인 화면으로
-        <Navigate to="/auth" />
+        <Navigate to="/" />
       : authUser.name === "admin"
       ? // admin이면 /admin
         <Navigate to="/admin" />
@@ -47,10 +47,7 @@ function App() {
         <HomePage />
   }
 />
-        <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/" />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} />
-        <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} />
-        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} />
+       
         <Route path="/" element={<LandingPage />} /> {/* 랜딩 페이지 */}
         <Route path="/home" element={authUser ? <HomePage /> : <Navigate to="/" />} /> {/* 홈 페이지 */}
         <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} /> {/* 인증 페이지 */}
