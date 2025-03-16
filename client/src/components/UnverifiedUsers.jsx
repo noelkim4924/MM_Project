@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle, Mail } from "lucide-react";
 import ConfirmToast from "../components/ConfirmToast";
-import { toast } from "react-hot-toast";  // <-- 새 컴포넌트 import
+import { toast } from "react-hot-toast";
 
 const UnverifiedUsers = () => {
-  // pending 멘토 목록
   const [mentorList, setMentorList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [subcategoryMap, setSubcategoryMap] = useState({});
@@ -13,14 +12,11 @@ const UnverifiedUsers = () => {
 
   const [confirmState, setConfirmState] = useState({
     open: false,
-    type: "verify", // or "decline"
+    type: "verify",
     message: "",
     onConfirm: null,
   });
 
-  // ─────────────────────────────────────────────────────────
-  // 1) 데이터 불러오기
-  // ─────────────────────────────────────────────────────────
   useEffect(() => {
     fetchAllCategories();
     fetchPendingMentors();
@@ -66,7 +62,7 @@ const UnverifiedUsers = () => {
   const handleVerify = (mentorId, categoryId) => {
     setConfirmState({
       open: true,
-      type: "verify", // ✅ 확인일 때
+      type: "verify",
       message: "Are you sure you want to verify this category?",
       onConfirm: async () => {
         try {
