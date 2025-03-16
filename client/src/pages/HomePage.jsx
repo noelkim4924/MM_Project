@@ -6,6 +6,9 @@ import { useMatchStore } from "../store/useMatchStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { axiosInstance } from "../lib/axios";
 import UserDetailModal from "../components/UserDetailModal";
+import { initializeSocket, getSocket } from "../socket/socket.client";
+import { useNotificationStore } from "../store/useNotificationStore";
+import { updateMatchesFromNotifications } from "../store/useMatchStore"; // 매칭 업데이트 함수
 
 const HomePage = () => {
   const { getUserProfiles } = useMatchStore();
@@ -18,6 +21,7 @@ const HomePage = () => {
   const [mentors, setMentors] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState(["Home"]);
+  const { addNotification } = useNotificationStore();
 
   // 기존과 동일한 그라디언트
   const gradientClasses = [
@@ -55,8 +59,16 @@ const HomePage = () => {
     // 멘토는 홈화면 그대로, 단 카테고리 카드 안 보이게 처리
   }, [authUser, navigate]);
 
-  // 2) 카테고리 불러오기
+  // 2) 카테고리 불러오기 및 소켓 초기화
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    console.log("User ID from localStorage:", userId);
+    if (userId) {
+      initializeSocket(userId);
+    } else {
+      console.warn("No userId found, socket not initialized.");
+    }
+  
     const fetchCategories = async () => {
       try {
         const res = await axiosInstance.get("/categories");
@@ -66,7 +78,44 @@ const HomePage = () => {
       }
     };
     fetchCategories();
-  }, []);
+  
+    let socket;
+    try {
+      socket = getSocket();
+      socket.on("connect", () => console.log("HomePage socket connected"));
+      socket.on("chatRequest", ({ menteeId, menteeName, requestId }) => {
+        console.log("Received chatRequest:", { menteeId, menteeName, requestId });
+        addNotification({
+          message: `${menteeName}님으로부터 새로운 채팅 요청이 도착했습니다!`,
+          menteeId,
+          requestId,
+        });
+      });
+  
+      socket.on("chatResponse", ({ mentorId, status, mentorName, mentorImage }) => {
+        console.log("Received chatResponse:", { mentorId, status, mentorName, mentorImage });
+        addNotification({
+          message: `${mentorName}님이 채팅 요청을 ${status === "accepted" ? "수락" : "거절"}했습니다.`,
+          mentorId,
+          status,
+          mentorName,
+          mentorImage,
+        });
+        if (status === "accepted") {
+          updateMatchesFromNotifications();
+        }
+      });
+    } catch (err) {
+      console.error("Socket not initialized yet:", err);
+    }
+  
+    return () => {
+      if (socket) {
+        socket.off("chatRequest");
+        socket.off("chatResponse");
+      }
+    };
+  }, [addNotification]);
 
   // 3) 유저 프로필 불러오기 (매칭 스토어)
   useEffect(() => {
@@ -112,7 +161,6 @@ const HomePage = () => {
   // =========================
   let content;
 
-  // "멘티"인 경우 => 카테고리 카드 + 아이콘
   if (authUser?.role === "mentee") {
     if (!selectedCategory && !selectedSubcategory) {
       // 메인 카테고리 목록
@@ -195,13 +243,11 @@ const HomePage = () => {
       );
     }
   } else {
-    // 멘티가 아니면(멘토/어드민/로그아웃) => 카드 숨김, 다른 메시지
+    // 멘티가 아닌 경우 => 다른 메시지
     content = (
       <div className="p-4 text-center text-gray-500">
         <p className="text-xl font-semibold mb-2">Always thanks to your service!</p>
-        <p className="text-sm">
-          To make better world
-        </p>
+        <p className="text-sm">To make better world</p>
       </div>
     );
   }

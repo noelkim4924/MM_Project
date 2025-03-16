@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import { X, MessageCircle } from "lucide-react";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { ClipLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import { useMatchStore } from "../store/useMatchStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useNotificationStore } from "../store/useNotificationStore";
 
 const Sidebar = ({ selectedTab, setSelectedTab }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,10 +13,31 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
 
   const { getMyMatches, matches, isLoadingMyMatches } = useMatchStore();
   const { authUser } = useAuthStore(); // 로그인한 유저 정보 가져오기
+  const { notifications } = useNotificationStore();
 
   useEffect(() => {
     getMyMatches();
   }, [getMyMatches]);
+
+  // notifications 변경 시 매칭 목록 갱신
+  useEffect(() => {
+    if (notifications.some((notif) => notif.status === "accepted")) {
+      getMyMatches(); // 수락 시 매칭 목록 재조회
+    }
+  }, [notifications, getMyMatches]);
+
+  // 백엔드 매칭과 알림 매칭 병합 (중복 제거)
+  const allMatches = [
+    ...matches,
+    ...notifications
+      .filter((notif) => notif.status === "accepted" && notif.mentorId)
+      .map((notif) => ({
+        _id: notif.mentorId,
+        name: notif.mentorName,
+        image: notif.mentorImage,
+      }))
+      .filter((mentor) => !matches.some((m) => m._id === mentor._id)),
+  ];
 
   return (
     <>
@@ -38,7 +60,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
             </button>
           </div>
 
-          {/* ✅ 어드민이면 Admin Panel UI */}
+          {/* 어드민이면 Admin Panel UI */}
           {authUser?.name === "admin" ? (
             <div className="flex-grow overflow-y-auto p-4">
               <ul className="space-y-4">
@@ -68,24 +90,27 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
                 </li>
               </ul>
             </div>
-          ) : (
+          ) : null}
+
+          {/* non-admin 사용자: 중복된 매칭 목록 중 allMatches만 남김 */}
+          {authUser?.name !== "admin" && (
             <div className="flex-grow overflow-y-auto p-4 z-10 relative">
               {isLoadingMyMatches ? (
                 <LoadingState />
-              ) : matches.length === 0 ? (
-                <NoMatchesFound /> // ✅ 기존 UI 복구
+              ) : allMatches.length === 0 ? (
+                <NoMatchesFound />
               ) : (
-                matches.map((match) => (
+                allMatches.map((match) => (
                   <Link key={match._id} to={`/chat/${match._id}`}>
-                    <div
-                      className="flex items-center mb-4 cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors duration-300"
-                    >
+                    <div className="flex items-center mb-4 cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors duration-300">
                       <img
                         src={match.image || "/avatar.png"}
                         alt="User avatar"
                         className="size-12 object-cover rounded-full mr-3 border-2 border-blue-300"
                       />
-                      <h3 className="font-semibold text-gray-800">{match.name}</h3>
+                      <h3 className="font-semibold text-gray-800">
+                        {match.name || "Unknown User"}
+                      </h3>
                     </div>
                   </Link>
                 ))
@@ -121,6 +146,8 @@ const LoadingState = () => (
   <div className="flex flex-col items-center justify-center h-full text-center">
     <ClipLoader color="#93c5fd" size={48} />
     <h3 className="text-xl font-semibold text-gray-700 mb-2">Loading Matches</h3>
-    <p className="text-gray-500 max-w-xs">We're finding your perfect matches. This might take a moment...</p>
+    <p className="text-gray-500 max-w-xs">
+      We're finding your perfect matches. This might take a moment...
+    </p>
   </div>
 );

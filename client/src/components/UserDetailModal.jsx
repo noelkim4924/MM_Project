@@ -1,7 +1,33 @@
 import React from "react";
+import { getSocket } from "../socket/socket.client";
+import { toast } from "react-hot-toast";
+import { useAuthStore } from "../store/useAuthStore";
 
 const UserDetailModal = ({ user, onClose }) => {
   if (!user) return null;
+
+  const { authUser } = useAuthStore();
+
+  const handleRequestChat = () => {
+    if (!authUser) {
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+    const menteeId = authUser._id;
+    try {
+      const socket = getSocket();
+      if (!socket.connected) {
+        toast.error("소켓 연결이 끊어졌습니다. 새로고침 후 다시 시도해주세요.");
+        return;
+      }
+      socket.emit("requestChat", { menteeId, mentorId: user._id });
+      toast.success("채팅 요청을 보냈습니다!");
+      onClose();
+    } catch (err) {
+      toast.error("소켓 오류가 발생했습니다. 다시 시도해주세요.");
+      console.error("Socket error in handleRequestChat:", err);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -26,7 +52,7 @@ const UserDetailModal = ({ user, onClose }) => {
           </p>
           <button
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={() => (window.location.href = `/chat/${user._id}`)}
+            onClick={handleRequestChat}
           >
             Request Chat
           </button>

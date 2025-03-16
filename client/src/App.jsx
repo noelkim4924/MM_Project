@@ -6,11 +6,15 @@ import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
 import AdminPage from "./pages/AdminPage";
 import { useAuthStore } from "./store/useAuthStore";
+import { useNotificationStore } from "./store/useNotificationStore";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import { initializeSocket, getSocket } from "./socket/socket.client";
+import { updateMatchesFromNotifications } from "./store/useMatchStore";
 
 function App() {
   const { checkAuth, authUser, checkingAuth } = useAuthStore();
+  const { addNotification } = useNotificationStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,7 +23,6 @@ function App() {
   }, [checkAuth]);
 
   useEffect(() => {
-    
     if (location.pathname === "/") {
       if (authUser?.name === "admin") {
         navigate("/admin");
@@ -28,6 +31,49 @@ function App() {
       }
     }
   }, [authUser, navigate, location.pathname]);
+
+  useEffect(() => {
+    if (authUser) {
+      initializeSocket(authUser._id);
+      const socket = getSocket();
+
+      socket.on("connect", () => console.log("App socket connected:", socket.id));
+
+      // 멘티에게만 chatResponse 이벤트 처리
+      socket.on("chatResponse", ({ mentorId, status, mentorName, mentorImage }) => {
+        if (authUser.role === "mentee") {
+          console.log("App received chatResponse:", { mentorId, status, mentorName });
+          addNotification({
+            message: `${mentorName}님이 채팅 요청을 ${status === "accepted" ? "수락" : "거절"}했습니다.`,
+            mentorId,
+            status,
+            mentorName,
+            mentorImage,
+          });
+          if (status === "accepted") {
+            updateMatchesFromNotifications();
+          }
+        }
+      });
+
+      // 멘토는 chatRequest 이벤트만 처리
+      socket.on("chatRequest", ({ menteeId, menteeName, requestId }) => {
+        if (authUser.role === "mentor") {
+          console.log("App received chatRequest:", { menteeId, menteeName, requestId });
+          addNotification({
+            message: `${menteeName}님으로부터 새로운 채팅 요청이 도착했습니다!`,
+            menteeId,
+            requestId,
+          });
+        }
+      });
+
+      return () => {
+        socket.off("chatRequest");
+        socket.off("chatResponse");
+      };
+    }
+  }, [authUser, addNotification]);
 
   if (checkingAuth) return null;
 
