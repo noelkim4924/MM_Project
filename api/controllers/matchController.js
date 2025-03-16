@@ -86,14 +86,26 @@ export const getMatches = async (req, res) => {
 export const getUserProfiles = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user._id);
-
-    const users = await User.find({
-      $and: [
-        { _id: { $ne: currentUser._id } }, // not matching with self
-        { _id: { $nin: currentUser.matches } }, // not matched with already matched users
-      ],
-    });
-
+    // query 파라미터에서 category와 role 읽기
+    const { category, role } = req.query;
+    
+    // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
+    const conditions = [
+      { _id: { $ne: currentUser._id } },
+      { _id: { $nin: currentUser.matches } }
+    ];
+    
+    // role이 제공되면 필터링
+    if (role) {
+      conditions.push({ role });
+    }
+    // category(세부 카테고리 _id)가 제공되면, 유저의 categories 배열에 해당 값이 포함되어야 함
+    if (category) {
+      conditions.push({ categories: category });
+    }
+    
+    const users = await User.find({ $and: conditions });
+    
     res.status(200).json({
       success: true,
       users,

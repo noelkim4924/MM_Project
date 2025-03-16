@@ -37,7 +37,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/messages", messageRoutes);
-app.use('/api', categoryRoutes);
+app.use("/api/categories", categoryRoutes);
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
