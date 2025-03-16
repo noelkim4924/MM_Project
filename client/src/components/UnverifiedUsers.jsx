@@ -24,7 +24,7 @@ const UnverifiedUsers = () => {
 
   const fetchAllCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/categories", {
+      const res = await axios.get("http://localhost:5000/api/categories", {
         withCredentials: true,
       });
       const catData = res.data.data || [];
@@ -45,7 +45,7 @@ const UnverifiedUsers = () => {
   const fetchPendingMentors = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5001/api/users/pending-mentors", {
+      const res = await axios.get("http://localhost:5000/api/users/pending-mentors", {
         withCredentials: true,
       });
       setMentorList(res.data.mentors || []);
@@ -66,7 +66,7 @@ const UnverifiedUsers = () => {
       message: "Are you sure you want to verify this category?",
       onConfirm: async () => {
         try {
-          await axios.post("http://localhost:5001/api/users/verify-category", {
+          await axios.post("http://localhost:5000/api/users/verify-category", {
             mentorId,
             categoryId,
             status: "verified",
@@ -88,7 +88,7 @@ const UnverifiedUsers = () => {
       message: "Are you sure you want to decline this category?",
       onConfirm: async () => {
         try {
-          await axios.post("http://localhost:5001/api/users/verify-category", {
+          await axios.post("http://localhost:5000/api/users/verify-category", {
             mentorId,
             categoryId,
             status: "declined",
