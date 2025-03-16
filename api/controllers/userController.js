@@ -66,7 +66,7 @@ export const getAllUsers = async (req, res) => {
 export const adminUpdateUser = async (req, res) => {
   try {
     const { userId } = req.params; // URL 파라미터
-    const { name, age, gender, role, resetImage } = req.body;
+    const { name, age, gender, role, bio, resetImage } = req.body;
     // resetImage === true 면, 프로필사진을 avatar.png 로 강제 변경
 
     // 1) DB에서 해당 유저 찾기
@@ -80,6 +80,7 @@ export const adminUpdateUser = async (req, res) => {
     if (age !== undefined) user.age = age; 
     if (gender !== undefined) user.gender = gender;
     if (role !== undefined) user.role = role;
+    if (bio !== undefined) user.bio = bio;
 
     // “부적절한 프로필 사진” → resetImage = true 일 경우 avatar.png로 교체
     if (resetImage) {

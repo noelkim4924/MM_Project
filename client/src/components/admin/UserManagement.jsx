@@ -66,7 +66,7 @@ const UserManagement = () => {
 
   // "Detail" 버튼 클릭 → /admin/user/:id 로 이동
   const handleDetail = (userId) => {
-    navigate(`/admin/user/${userId}`);
+    navigate(`/admin/edit-user/${userId}`);
   };
 
   return (
