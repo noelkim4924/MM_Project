@@ -3,6 +3,9 @@ import { Header } from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import { axiosInstance } from "../lib/axios";
 import UserDetailModal from "../components/UserDetailModal";
+import { initializeSocket, getSocket } from "../socket/socket.client";
+import { useNotificationStore } from "../store/useNotificationStore";
+import { updateMatchesFromNotifications } from "../store/useMatchStore"; // 매칭 업데이트 함수
 
 const HomePage = () => {
   const [categories, setCategories] = useState([]);
@@ -11,32 +14,39 @@ const HomePage = () => {
   const [mentors, setMentors] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState(["Home"]);
+  const { addNotification } = useNotificationStore();
 
-  // 그래디언트 색상 배열 (이미지 스타일에 맞게 조정)
   const gradientClasses = [
-    "bg-gradient-to-r from-purple-400 to-indigo-500", // Mentee: Career Growth & Navigation
-    "bg-gradient-to-r from-orange-400 to-yellow-500", // Mentee: Professional Development & Soft Skills
-    "bg-gradient-to-r from-pink-400 to-red-500",     // Mentee: Diversity, Inclusion & Workplace Challenges
-    "bg-gradient-to-r from-blue-400 to-cyan-500",    // Mentor: Software Development & Engineering
-    "bg-gradient-to-r from-yellow-400 to-orange-500", // Mentor: Data & AI
-    "bg-gradient-to-r from-green-400 to-lime-500",   // Mentor: Product & Design
-    "bg-gradient-to-r from-indigo-400 to-purple-500", // Mentor: Career & Leadership
-    "bg-gradient-to-r from-amber-400 to-yellow-500",  // Mentor: Diversity & Inclusion in Tech
+    "bg-gradient-to-r from-purple-400 to-indigo-500",
+    "bg-gradient-to-r from-orange-400 to-yellow-500",
+    "bg-gradient-to-r from-pink-400 to-red-500",
+    "bg-gradient-to-r from-blue-400 to-cyan-500",
+    "bg-gradient-to-r from-yellow-400 to-orange-500",
+    "bg-gradient-to-r from-green-400 to-lime-500",
+    "bg-gradient-to-r from-indigo-400 to-purple-500",
+    "bg-gradient-to-r from-amber-400 to-yellow-500",
   ];
 
-  // 아이콘 경로 배열 (가정)
   const iconPaths = [
-    "/public/icons/career-growth.png",         // Mentee: Career Growth & Navigation
-    "/public/icons/professional-dev.png",      // Mentee: Professional Development & Soft Skills
-    "/public/icons/diversity.png",             // Mentee: Diversity, Inclusion & Workplace Challenges
-    "/public/icons/software-dev.png",          // Mentor: Software Development & Engineering
-    "/public/icons/data-ai.png",               // Mentor: Data & AI
-    "/public/icons/product-design.png",        // Mentor: Product & Design
-    "/public/icons/career-leadership.png",     // Mentor: Career & Leadership
-    "/public/icons/diversity-tech.png",        // Mentor: Diversity & Inclusion in Tech
+    "/public/icons/career-growth.png",
+    "/public/icons/professional-dev.png",
+    "/public/icons/diversity.png",
+    "/public/icons/software-dev.png",
+    "/public/icons/data-ai.png",
+    "/public/icons/product-design.png",
+    "/public/icons/career-leadership.png",
+    "/public/icons/diversity-tech.png",
   ];
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    console.log("User ID from localStorage:", userId);
+    if (userId) {
+      initializeSocket(userId);
+    } else {
+      console.warn("No userId found, socket not initialized.");
+    }
+  
     const fetchCategories = async () => {
       try {
         const res = await axiosInstance.get("/categories");
@@ -46,7 +56,44 @@ const HomePage = () => {
       }
     };
     fetchCategories();
-  }, []);
+  
+    let socket;
+    try {
+      socket = getSocket();
+      socket.on("connect", () => console.log("HomePage socket connected"));
+      socket.on("chatRequest", ({ menteeId, menteeName, requestId }) => {
+        console.log("Received chatRequest:", { menteeId, menteeName, requestId });
+        addNotification({
+          message: `${menteeName}님으로부터 새로운 채팅 요청이 도착했습니다!`,
+          menteeId,
+          requestId,
+        });
+      });
+  
+      socket.on("chatResponse", ({ mentorId, status, mentorName, mentorImage }) => {
+        console.log("Received chatResponse:", { mentorId, status, mentorName, mentorImage });
+        addNotification({
+          message: `${mentorName}님이 채팅 요청을 ${status === "accepted" ? "수락" : "거절"}했습니다.`,
+          mentorId,
+          status,
+          mentorName,
+          mentorImage,
+        });
+        if (status === "accepted") {
+          updateMatchesFromNotifications();
+        }
+      });
+    } catch (err) {
+      console.error("Socket not initialized yet:", err);
+    }
+  
+    return () => {
+      if (socket) {
+        socket.off("chatRequest");
+        socket.off("chatResponse");
+      }
+    };
+  }, [addNotification]);
 
   useEffect(() => {
     const fetchMentors = async () => {
@@ -97,8 +144,8 @@ const HomePage = () => {
               <img
                 src={iconPaths[idx % iconPaths.length]}
                 alt={`${cat.name} icon`}
-                className="w-16 h-16 mb-2 opacity-75 rounded-full" 
-                onError={(e) => console.error(`Image load failed: ${e.target.src}`)} // 디버깅용
+                className="w-16 h-16 mb-2 opacity-75 rounded-full"
+                onError={(e) => console.error(`Image load failed: ${e.target.src}`)}
               />
               <p className="text-2xl font-semibold">{cat.name}</p>
             </div>

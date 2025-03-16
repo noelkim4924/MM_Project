@@ -1,120 +1,120 @@
+// api/controllers/matchController.js
 import User from "../models/User.js";
+import ChatRequest from "../models/ChatRequest.js";
+import { getIO, getConnectedUsers } from "../socket/socket.server.js";
 
-export const swipeRight = async (req, res) => {
+export const acceptChatRequest = async (req, res) => {
   try {
-    const { likedUserId } = req.params;
-    const currentUser = await User.findById(req.user._id);
-    const likedUser = await User.findById(likedUserId);
+    const { requestId } = req.params;
+    const userId = req.user._id; // 인증된 사용자 (멘토)
 
-    if (!likedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
+    const chatRequest = await ChatRequest.findById(requestId).populate("menteeId mentorId");
+    if (!chatRequest || chatRequest.mentorId.toString() !== userId.toString()) {
+      return res.status(400).json({ message: "Invalid request" });
+    }
+
+    if (chatRequest.status !== "pending") {
+      return res.status(400).json({ message: "Request already processed" });
+    }
+
+    // 상태 업데이트
+    chatRequest.status = "accepted";
+    await chatRequest.save();
+
+    // 양쪽에 매칭 추가
+    await Promise.all([
+      User.updateOne(
+        { _id: chatRequest.menteeId._id },
+        { $addToSet: { matches: chatRequest.mentorId._id } }
+      ),
+      User.updateOne(
+        { _id: chatRequest.mentorId._id },
+        { $addToSet: { matches: chatRequest.menteeId._id } }
+      ),
+    ]);
+
+    // 소켓 알림
+    const io = getIO();
+    const connectedUsersMap = getConnectedUsers();
+    const menteeSocketId = connectedUsersMap.get(chatRequest.menteeId._id.toString());
+    const mentorSocketId = connectedUsersMap.get(chatRequest.mentorId._id.toString());
+    const mentor = await User.findById(chatRequest.mentorId._id).select("name image");
+
+    if (menteeSocketId) {
+      io.to(menteeSocketId).emit("chatResponse", {
+        mentorId: chatRequest.mentorId._id,
+        status: "accepted",
+        mentorName: mentor.name,
+        mentorImage: mentor.image,
+      });
+    }
+    if (mentorSocketId) {
+      io.to(mentorSocketId).emit("chatResponse", {
+        menteeId: chatRequest.menteeId._id,
+        status: "accepted",
+        menteeName: chatRequest.menteeId.name,
       });
     }
 
-    if (!currentUser.likes.includes(likedUserId)) {
-      currentUser.likes.push(likedUserId);
-      await currentUser.save();
+    res.status(200).json({ success: true, message: "Chat request accepted" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 
-      // if the other user has liked the current user, then it's a match
-      if (likedUser.likes.includes(currentUser._id)) {
-        currentUser.matches.push(likedUserId);
-        likedUser.matches.push(currentUser._id);
-
-        await Promise.all([
-          currentUser.save(),
-          likedUser.save(),
-        ]);
-      }
+// 기존 함수 유지
+export const swipeRight = async (req, res) => {
+  try {
+    const { likedUserId } = req.params;
+    const userId = req.user._id;
+    const likedUser = await User.findById(likedUserId);
+    if (!likedUser) {
+      return res.status(404).json({ message: "User not found" });
     }
-
-    res.status(200).json({
-      success: true,
-      user: currentUser,
-    });
-  } catch (error) {
-    console.log("Error in swipeRight controller: ", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    res.status(200).json({ success: true, message: "Swipe right recorded" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 export const swipeLeft = async (req, res) => {
   try {
-    const { dislikedUserId } = req.params;
-    const currentUser = await User.findById(req.user._id);
-
-    if (!currentUser.dislikes.includes(dislikedUserId)) {
-      currentUser.dislikes.push(dislikedUserId);
-      await currentUser.save();
+    const { likedUserId } = req.params;
+    const userId = req.user._id;
+    const likedUser = await User.findById(likedUserId);
+    if (!likedUser) {
+      return res.status(404).json({ message: "User not found" });
     }
-
-    res.status(200).json({
-      success: true,
-      user: currentUser,
-    });
-  } catch (error) {
-    console.log("Error in swipeLeft controller: ", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    res.status(200).json({ success: true, message: "Swipe left recorded" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 export const getMatches = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate("matches", "name image");
-
-    res.status(200).json({
-      success: true,
-      message: "Matches fetched successfully",
-      data: user.matches,
-    });
-  } catch (error) {
-    console.log("Error in getMatches controller: ", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    const userId = req.user._id;
+    const user = await User.findById(userId).populate("matches", "name image");
+    res.status(200).json({ matches: user.matches || [] });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch matches", error: err.message });
   }
 };
 
 export const getUserProfiles = async (req, res) => {
   try {
-    const currentUser = await User.findById(req.user._id);
-    // query 파라미터에서 category와 role 읽기
     const { category, role } = req.query;
-    
-    // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
-    const conditions = [
-      { _id: { $ne: currentUser._id } },
-      { _id: { $nin: currentUser.matches } }
-    ];
-    
-    // role이 제공되면 필터링
-    if (role) {
-      conditions.push({ role });
-    }
-    // category(세부 카테고리 _id)가 제공되면, 유저의 categories 배열에 해당 값이 포함되어야 함
-    if (category) {
-      conditions.push({ categories: category });
-    }
-    
-    const users = await User.find({ $and: conditions });
-    
-    res.status(200).json({
-      success: true,
-      users,
-    });
-  } catch (error) {
-    console.log("Error in getUserProfiles controller: ", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-    });
+    const userId = req.user._id;
+
+    const users = await User.find({
+      role: role || "mentor",
+      categories: category,
+      _id: { $ne: userId },
+      matches: { $nin: [userId] },
+    }).select("name image age");
+
+    res.status(200).json({ users });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch user profiles", error: err.message });
   }
 };
