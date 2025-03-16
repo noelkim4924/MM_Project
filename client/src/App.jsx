@@ -18,22 +18,28 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
-  // 기존의 자동 리다이렉트 useEffect 제거!
+  useEffect(() => {
+    
+    if (location.pathname === "/") {
+      if (authUser?.name === "admin") {
+        navigate("/admin");
+      } else if (authUser) {
+        navigate("/home");
+      }
+    }
+  }, [authUser, navigate, location.pathname]);
 
   if (checkingAuth) return null;
 
   return (
     <div className="absolute inset-0 -z-10 h-full w-full bg-white">
       <Routes>
-        {/* 첫 페이지는 항상 LandingPage */}
-        <Route path="/" element={<LandingPage />} />
-
-        {/* 나머지 라우트는 그대로 유지 */}
-        <Route path="/home" element={authUser ? <HomePage /> : <Navigate to="/auth" />} />
-        <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} />
-        <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} />
-        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} />
+        <Route path="/" element={<LandingPage />} /> {/* 랜딩 페이지 */}
+        <Route path="/home" element={authUser ? <HomePage /> : <Navigate to="/" />} /> {/* 홈 페이지 */}
+        <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} /> {/* 인증 페이지 */}
+        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} /> {/* 프로필 페이지 */}
+        <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} /> {/* 채팅 페이지 */}
+        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} /> {/* 관리자 페이지 */}
       </Routes>
       <Toaster />
     </div>
