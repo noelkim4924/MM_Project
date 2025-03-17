@@ -18,7 +18,7 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // 환경 변수 로드 확인
 console.log("CLIENT_URL:", process.env.CLIENT_URL);

@@ -185,21 +185,40 @@ export const updateProfile = async (req, res) => {
     //    예: [{ categoryId: "xxxx", status: "pending" }, ...]
     const incomingCategories = categories || [];
 
+    const removedCatIds = oldCategories
+      .filter((oldCat) => {
+        // incoming에 같은 categoryId가 전혀 없으면 => 삭제됨
+        return !incomingCategories.some(
+          (catObj) => catObj.categoryId === oldCat.categoryId
+        );
+      })
+      .map((cat) => cat.categoryId);
+
     // 4) 최종 반영할 배열을 만든다.
     //    (새로 추가된 항목은 pending, 기존 항목은 기존 status 유지)
     const finalCategories = incomingCategories.map((catObj) => {
-      // 기존에 존재하던 항목인지 확인
+      // oldCat 찾기
       const oldCat = oldCategories.find(
         (o) => o.categoryId === catObj.categoryId
       );
+
       if (oldCat) {
-        // 기존에 있던 카테고리는 원래 status를 유지
-        return {
-          categoryId: oldCat.categoryId,
-          status: oldCat.status,
-        };
+        // 만약 oldCat이 있는데, 그 ID가 "removedCatIds"에 포함되었다면
+        // => 같은 업데이트 내에서 "삭제 후 재추가"된 것 → 새로 추가된 것으로 간주
+        if (removedCatIds.includes(oldCat.categoryId)) {
+          return {
+            categoryId: catObj.categoryId,
+            status: 'pending',
+          };
+        } else {
+          // 기존 상태 유지
+          return {
+            categoryId: oldCat.categoryId,
+            status: oldCat.status,
+          };
+        }
       } else {
-        // 새로 추가된 항목은 'pending'으로
+        // 완전히 새로 추가된 항목
         return {
           categoryId: catObj.categoryId,
           status: 'pending',
