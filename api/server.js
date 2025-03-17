@@ -10,6 +10,7 @@ import userRoutes from "./routes/userRoutes.js";
 import matchRoutes from "./routes/matchRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import logRoutes from './routes/logRoutes.js';
 
 import { connectDB } from "./config/db.js";
 import { initializeSocket } from "./socket/socket.server.js";
@@ -41,6 +42,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/matches", matchRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use('/api/logs', logRoutes);
 
 // DB 연결 실패 시 서버 계속 실행
 const startServer = async () => {

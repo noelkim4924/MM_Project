@@ -59,7 +59,7 @@ const UnverifiedUsers = () => {
   // ─────────────────────────────────────────────────────────
   // 2) "Verify" / "Decline" 버튼 클릭 시 → confirmState 열기
   // ─────────────────────────────────────────────────────────
-  const handleVerify = (mentorId, categoryId) => {
+  const handleVerify = (mentorId, mentorName, categoryId, categoryName) => {
     setConfirmState({
       open: true,
       type: "verify",
@@ -70,7 +70,10 @@ const UnverifiedUsers = () => {
             mentorId,
             categoryId,
             status: "verified",
+            mentorName,
+            categoryName
           }, { withCredentials: true });
+
           toast.success("Category has been verified.");
           fetchPendingMentors();
         } catch (err) {
@@ -81,10 +84,10 @@ const UnverifiedUsers = () => {
     });
   };
 
-  const handleDecline = (mentorId, categoryId) => {
+  const handleDecline = (mentorId, mentorName, categoryId, categoryName) => {
     setConfirmState({
       open: true,
-      type: "decline", // ✅ 거절일 때
+      type: "decline",
       message: "Are you sure you want to decline this category?",
       onConfirm: async () => {
         try {
@@ -92,7 +95,10 @@ const UnverifiedUsers = () => {
             mentorId,
             categoryId,
             status: "declined",
+            mentorName,
+            categoryName
           }, { withCredentials: true });
+
           toast.success("Category has been declined.");
           fetchPendingMentors();
         } catch (err) {
@@ -177,14 +183,14 @@ const UnverifiedUsers = () => {
 
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleDecline(mentor._id, cat.categoryId)}
+                            onClick={() => handleDecline(mentor._id, mentor.name, cat.categoryId, catName)}
                             className="text-red-500 hover:text-red-700"
                             title="Decline"
                           >
                             <XCircle size={24} />
                           </button>
                           <button
-                            onClick={() => handleVerify(mentor._id, cat.categoryId)}
+                            onClick={() => handleVerify(mentor._id, mentor.name, cat.categoryId, catName)}
                             className="text-green-500 hover:text-green-700"
                             title="Verify"
                           >
