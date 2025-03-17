@@ -296,6 +296,7 @@ export const verifyMentorCategory = async (req, res) => {
     await Log.create({
       user: mentorId,
       action: `${categoryName} ${status} for ${mentorName}`,
+      status: status,
       timestamp: Date.now()
     });
 

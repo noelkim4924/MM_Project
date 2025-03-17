@@ -16,7 +16,7 @@ const logSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['accepted', 'rejected'],
+    enum: ['verified', 'declined'],
     default: null
   }
 });
