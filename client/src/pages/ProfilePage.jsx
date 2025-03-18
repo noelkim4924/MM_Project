@@ -4,6 +4,8 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useUserStore } from "../store/useUserStore";
 import CategoryDropdown from "../components/CategoryDropdown";
 import { useNavigate } from "react-router-dom";
+import ConfirmToast from "../components/admin/ConfirmToast"; // <-- import
+
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
@@ -14,6 +16,12 @@ const ProfilePage = () => {
   const [age, setAge] = useState(authUser?.age || "");
   const [gender, setGender] = useState(authUser?.gender || "");
   const [bio, setBio] = useState("");
+  const [confirmState, setConfirmState] = useState({
+    open: false,
+    type: "decline",
+    message: "",
+    onConfirm: null,
+  });
   /**
    * ✅ categories를 [ { categoryId, status }, ... ] 형태로 관리
    */
@@ -82,9 +90,42 @@ const ProfilePage = () => {
    *    pending/verified/declined 전부 삭제 가능
    */
   const removeCategory = (categoryIdToRemove) => {
-    setCategories((prev) =>
-      prev.filter((cat) => cat.categoryId !== categoryIdToRemove)
-    );
+    // 1) 해당 카테고리를 찾기
+    const catToRemove = categories.find((cat) => cat.categoryId === categoryIdToRemove);
+    if (!catToRemove) return; // 이미 없음
+
+    // 2) 만약 status === 'verified'라면 ConfirmToast를 띄운다
+    if (catToRemove.status === "verified") {
+      setConfirmState({
+        open: true,
+        type: "decline", // 빨간색
+        message: "Are you sure you want to remove this verified category? You will need to verify again if you add it back.",
+        onConfirm: () => {
+          // 실제로 삭제 수행
+          setCategories((prev) =>
+            prev.filter((cat) => cat.categoryId !== categoryIdToRemove)
+          );
+          // 토스트 닫기
+          setConfirmState((prev) => ({ ...prev, open: false }));
+        },
+      });
+    } else {
+      // 3) verified가 아니면 그냥 즉시 삭제
+      setCategories((prev) =>
+        prev.filter((cat) => cat.categoryId !== categoryIdToRemove)
+      );
+    }
+  };
+
+  // ConfirmToast에서 Cancel/Yes
+  const closeConfirm = () => {
+    setConfirmState((prev) => ({ ...prev, open: false }));
+  };
+
+  const confirmYes = async () => {
+    if (confirmState.onConfirm) {
+      await confirmState.onConfirm();
+    }
   };
 
   if (loading) {
@@ -211,12 +252,12 @@ const ProfilePage = () => {
 
               {/* CATEGORIES (멘토일 때만) */}
               {role === "mentor" && (
-                <CategoryDropdown
-                  selectedCategories={categories}
-                  onCategoryChange={handleCategoryChange}
-                  onRemoveCategory={removeCategory}
-                  role={role}
-                />
+            <CategoryDropdown
+              selectedCategories={categories}
+              onCategoryChange={handleCategoryChange}
+              onRemoveCategory={removeCategory} // removeCategory
+              role={role}
+            />
               )}
 
               <button
@@ -233,6 +274,14 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+      {confirmState.open && (
+        <ConfirmToast
+          type={confirmState.type}
+          message={confirmState.message}
+          onConfirm={confirmYes}
+          onCancel={closeConfirm}
+        />
+      )}
     </div>
   );
 };
