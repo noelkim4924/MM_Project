@@ -33,8 +33,13 @@ const userSchema = new mongoose.Schema({
     image: { type: String, default: "" },
     bio: { type: String, default: "" },
     availability: { type: [String], default: [] },
-    categories: { type: [String], default: [] },
-
+    categories: [
+      {
+        categoryId: { type: String, required: true }, 
+        status: { type: String, enum: ["pending", "verified", "declined"], default: "pending" }
+      }
+    ],
+    
   matches: [
     {
       type: mongoose.Schema.Types.ObjectId,

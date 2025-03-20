@@ -3,6 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
+
 export const useUserStore = create((set) => ({
   profile: null,
   loading: false,
@@ -13,7 +14,6 @@ export const useUserStore = create((set) => ({
       console.log("fetchProfile called with userId:", userId);
       const response = await axiosInstance.get(`/users/${userId}`);
       set((state) => {
-        
         if (JSON.stringify(state.profile) !== JSON.stringify(response.data)) {
           toast.success("Profile fetched successfully");
         }
@@ -27,22 +27,43 @@ export const useUserStore = create((set) => ({
     }
   },
 
-  updateProfile: async (data) => {
+// useUserStore.js (수정 후)
+updateProfile: async (data) => {
+  try {
+    set({ loading: true });
+    console.log("Updating profile with data:", data);
+    const res = await axiosInstance.put("/users/update", data);
+    
+    // ✅ 디버깅: 응답 코드/데이터 확인
+    console.log("updateProfile response status:", res.status);
+    console.log("updateProfile response data:", res.data);
+
+    if (res.status === 200 && res.data.success) {
+      // 정상
+      useAuthStore.getState().setAuthUser(res.data.data);
+      set({ profile: res.data.data });
+      toast.success(res.data.message || "Profile updated successfully");
+    } else {
+      // 혹시 success=false 이거나 status 200인데 뭔가 문제인 경우
+      console.warn("Unexpected success=false or missing data:", res.data);
+      toast.error(res.data.message || "Something went wrong");
+    }
+  } catch (error) {
+    console.error("Profile update error:", error);
+    toast.error(error.response?.data?.message || "Something went wrong");
+  } finally {
+    set({ loading: false });
+  }
+},
+
+
+  requestCategoryVerification: async () => {
     try {
-      console.log("Updating profile with data:", data);
       set({ loading: true });
-      const res = await axiosInstance.put("/users/update", data);
-      console.log("Backend response:", res.data);
-      if (res.data && res.data.user) {
-        useAuthStore.getState().setAuthUser(res.data.user);
-        set({ profile: res.data.user });
-        toast.success(res.data.message || "Profile updated successfully");
-      } else {
-        console.warn("Unexpected response format:", res.data);
-        toast.success("Profile updated successfully");
-      }
+      // 👇 PUT -> POST로 변경
+      const res = await axiosInstance.post("/users/request-category-verification");
+      toast.success("Verification request sent to admin");
     } catch (error) {
-      console.error("Profile update error:", error.response?.data || error.message);
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ loading: false });
