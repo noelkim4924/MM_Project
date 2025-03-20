@@ -5,23 +5,15 @@ import { useMessageStore } from "../store/useMessageStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Header } from "../components/Header";
 import MessageInput from "../components/MessageInput";
-import { axiosInstance } from "../lib/axios"; // axiosInstance 사용
+import { axiosInstance } from "../lib/axios";
 
 const ChatPage = () => {
   const { id: chatPartnerId } = useParams(); // URL의 :id가 채팅 상대의 ID
   const { authUser } = useAuthStore();
-  const {
-    messages,
-    getMessages,
-    subscribeToMessages,
-    unsubscribeFromMessages,
-    loading,
-  } = useMessageStore();
-
-  // 채팅 상대의 프로필 정보를 저장할 상태
+  const { messages, getMessages, subscribeToMessages, unsubscribeFromMessages, loading } = useMessageStore();
   const [chatPartner, setChatPartner] = useState(null);
 
-  // 채팅 상대의 프로필 데이터 불러오기 (예: /users/:id 엔드포인트)
+  // 채팅 상대 프로필 데이터 불러오기 (예: /users/:id 엔드포인트)
   useEffect(() => {
     if (chatPartnerId) {
       axiosInstance
@@ -63,7 +55,7 @@ const ChatPage = () => {
           <img
             src={chatPartner && chatPartner.image ? chatPartner.image : "/avatar.png"}
             alt="Chat Partner"
-            className="w-12 h-12 object-cover rounded-full mr-3 border-2 border-pink-300"
+            className="w-12 h-12 object-cover rounded-full mr-3 border-2 border-green-300"
           />
           <h2 className="text-xl font-semibold text-gray-800">
             Chat with {chatPartner ? chatPartner.name : chatPartnerId}
@@ -84,8 +76,8 @@ const ChatPage = () => {
                 <span
                   className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
                     msg.sender === authUser._id
-                      ? "bg-pink-500 text-white"
-                      : "bg-gray-200 text-gray-800"
+                      ? "bg-blue-300 text-white"
+                      : "bg-green-200 text-gray-800"
                   }`}
                 >
                   {msg.content}

@@ -15,7 +15,7 @@ export const useMessageStore = create((set) => ({
         toast.error("User not authenticated");
         return;
       }
-      // mockup a message, show it in the chat immediately
+      // Immediately add message to state for instant UI feedback
       set((state) => ({
         messages: [
           ...state.messages,
@@ -35,7 +35,7 @@ export const useMessageStore = create((set) => ({
       const res = await axiosInstance.get(`/messages/conversation/${userId}`);
       set({ messages: res.data.messages });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       set({ messages: [] });
     } finally {
       set({ loading: false });
