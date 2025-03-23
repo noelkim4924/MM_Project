@@ -1,4 +1,5 @@
 import Category from '../models/Category.js';
+import User from '../models/User.js';
 
 // Get all categories
 export const getCategories = async (req, res) => {
@@ -72,15 +73,27 @@ export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const categoryDoc = await Category.findOneAndUpdate(
+    // Find the category document
+    const categoryDoc = await Category.findOne({ 'categories._id': id });
+    if (!categoryDoc) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    // Get the subcategory IDs to be removed
+    const subcategoryIds = categoryDoc.categories.id(id).subcategories.map(subcat => subcat._id);
+
+    // Remove the category
+    await Category.findOneAndUpdate(
       {},
       { $pull: { categories: { _id: id } } },
       { new: true }
     );
 
-    if (!categoryDoc) {
-      return res.status(404).json({ message: 'Category not found' });
-    }
+    // Remove subcategory IDs from users
+    await User.updateMany(
+      {},
+      { $pull: { categories: { categoryId: { $in: subcategoryIds } } } }
+    );
 
     res.status(200).json({ success: true, data: categoryDoc.categories });
   } catch (error) {
@@ -153,6 +166,12 @@ export const deleteSubcategory = async (req, res) => {
       console.error(`Category not found: ${categoryId}`);
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
+
+    // Remove subcategory ID from users
+    await User.updateMany(
+      {},
+      { $pull: { categories: { categoryId: subcategoryId } } }
+    );
 
     res.status(200).json({ success: true, data: category });
   } catch (error) {
