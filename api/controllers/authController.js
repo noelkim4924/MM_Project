@@ -36,9 +36,7 @@ export const signup = async (req, res) => {
 
     })
 
-
     const token = signToken(newUser._id);
-
 
     res.cookie("jwt",token, {
       maxAge : 7 * 24 * 60 * 60 * 1000,   // 7 days
@@ -67,6 +65,7 @@ export const signup = async (req, res) => {
     })
   }
 }  
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -107,6 +106,7 @@ export const login = async (req, res) => {
     })
   }
 }
+
 export const logout = async (req, res) => {
   res.clearCookie("jwt");
   res.status(200).json({
@@ -114,3 +114,32 @@ export const logout = async (req, res) => {
     message: 'Logged out'
   })
 }
+
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user || !(await user.matchPassword(oldPassword))) {
+      return res.status(401).json({
+        success: false,
+        message: 'Old password is incorrect',
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred',
+    });
+  }
+};

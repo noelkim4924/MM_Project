@@ -6,6 +6,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
 import AdminPage from "./pages/AdminPage";
 import AdminEditUser from "./components/admin/AdminEditUser";
+import PasswordChange from "./components/PasswordChange";
 import { useAuthStore } from "./store/useAuthStore";
 import { useNotificationStore } from "./store/useNotificationStore";
 import { useEffect } from "react";
@@ -89,6 +90,7 @@ function App() {
         <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} /> {/* 채팅 페이지 */}
         <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} /> {/* 관리자 페이지 */}
         <Route path="/admin/edit-user/:id" element={<AdminEditUser />} />
+        <Route path="/change-password" element={<PasswordChange />} />
       </Routes>
       <Toaster />
     </div>

@@ -8,7 +8,7 @@ const UserHistory = () => {
     const fetchLogs = async () => {
       try {
         console.log('Fetching logs from API...');
-        const response = await axios.get('http://localhost:5000/api/logs'); // Ensure the correct URL
+        const response = await axios.get('http://localhost:5001/api/logs'); // Ensure the correct URL
         console.log('Logs fetched:', response.data);
         setLogs(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
