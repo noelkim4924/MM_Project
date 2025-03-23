@@ -1,5 +1,5 @@
 import User from '../models/User.js';
-
+import Log from '../models/Log.js';
 import jwt from 'jsonwebtoken';
 
 const signToken = (id) => {
@@ -46,6 +46,13 @@ export const signup = async (req, res) => {
       sameSite :"strict", // cookie cannot be accessed by the browser
       secure : process.env.NODE_ENV === "production",
     })
+
+    // Log the user creation
+    await Log.create({
+      user: newUser._id,
+      action: `User created: ${name}, ${email}, ${role}`,
+      timestamp: Date.now()
+    });
 
     res.status(201).json({
       sucess: true,

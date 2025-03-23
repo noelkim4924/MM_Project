@@ -1,5 +1,7 @@
 import cloudinary from '../config/cloudinary.js';
 import User from '../models/User.js';
+import Log from '../models/Log.js';
+import Category from '../models/Category.js'
 
 // userController.js (추가)
 
@@ -10,7 +12,7 @@ export const getAllUsers = async (req, res) => {
   try {
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
-    const { search, role, page = 1 } = req.query; 
+    const { search, role, page = 1 } = req.query;
     // page가 문자열로 올 테니, 숫자로 변환
     const pageNumber = parseInt(page) || 1;
     const pageSize = 20; // 한 페이지에 20명
@@ -44,16 +46,16 @@ export const getAllUsers = async (req, res) => {
       .limit(pageSize)
       .sort({ createdAt: -1 }); // 정렬은 예시
 
-      const currentPage = pageNumber;
-      const totalPages = Math.ceil(totalCount / pageSize);
+    const currentPage = pageNumber;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
-      return res.status(200).json({
-        success: true,
-        data: users,
-        totalCount,
-        currentPage,
-        totalPages,
-      });
+    return res.status(200).json({
+      success: true,
+      data: users,
+      totalCount,
+      currentPage,
+      totalPages,
+    });
   } catch (error) {
     console.error("Error in getAllUsers:", error);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -65,26 +67,50 @@ export const getAllUsers = async (req, res) => {
 
 export const adminUpdateUser = async (req, res) => {
   try {
-    const { userId } = req.params; // URL 파라미터
-    const { name, age, gender, role, resetImage } = req.body;
-    // resetImage === true 면, 프로필사진을 avatar.png 로 강제 변경
+    const { userId } = req.params; // URL parameter
+    const { name, age, gender, role, bio, resetImage, categories } = req.body;
+    // resetImage === true means the profile picture should be changed to avatar.png
 
-    // 1) DB에서 해당 유저 찾기
+    // 1) Find the user in the database
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // 2) 수정 가능한 필드만 업데이트
+    // 2) Update only the fields that can be modified
     if (name !== undefined) user.name = name;
-    if (age !== undefined) user.age = age; 
+    if (age !== undefined) user.age = age;
     if (gender !== undefined) user.gender = gender;
     if (role !== undefined) user.role = role;
+    if (bio !== undefined) user.bio = bio;
 
-    // “부적절한 프로필 사진” → resetImage = true 일 경우 avatar.png로 교체
+    // “Inappropriate profile picture” → resetImage = true means change to avatar.png
     if (resetImage) {
-      user.image = "/avatar.png"; // 또는 실제 CDN 경로
+      user.image = "/avatar.png"; // or the actual CDN path
     }
+
+    // Handle categories similar to updateProfile function
+    const oldCategories = user.categories || [];
+    const incomingCategories = categories || [];
+
+    const finalCategories = incomingCategories.map((catObj) => {
+      const oldCat = oldCategories.find(
+        (o) => o.categoryId.toString() === catObj.categoryId.toString()
+      );
+      if (oldCat) {
+        return {
+          categoryId: oldCat.categoryId,
+          status: oldCat.status,
+        };
+      } else {
+        return {
+          categoryId: catObj.categoryId,
+          status: 'pending',
+        };
+      }
+    });
+
+    user.categories = finalCategories;
 
     await user.save();
 
@@ -178,7 +204,7 @@ export const updateProfile = async (req, res) => {
     }
 
     // 2) DB에 저장된 기존 categories
-    const oldCategories = user.categories || []; 
+    const oldCategories = user.categories || [];
     // oldCategories: [{ categoryId, status }, ...]
 
     // 3) 프론트에서 넘어온 최종 categories
@@ -269,7 +295,7 @@ export const updateProfile = async (req, res) => {
 
 export const verifyMentorCategory = async (req, res) => {
   try {
-    const { mentorId, categoryId, status } = req.body; // 어드민이 보낸 데이터
+    const { mentorId, categoryId, status, mentorName, categoryName } = req.body; // 어드민이 보낸 데이터
 
     if (!['verified', 'declined'].includes(status)) {
       return res.status(400).json({ message: "Invalid status. Use 'verified' or 'declined'." });
@@ -284,6 +310,14 @@ export const verifyMentorCategory = async (req, res) => {
     if (categoryIndex === -1) {
       return res.status(404).json({ message: 'Category not found in mentor profile' });
     }
+
+    // Log the user creation
+    await Log.create({
+      user: mentorId,
+      action: `${categoryName} ${status} for ${mentorName}`,
+      status: status,
+      timestamp: Date.now()
+    });
 
     mentor.categories[categoryIndex].status = status;
     await mentor.save();
@@ -337,7 +371,7 @@ export const getPendingMentors = async (req, res) => {
         name: mentor.name,
         email: mentor.email,
         image: mentor.image,        // 추가
-        categories: pendingCats, 
+        categories: pendingCats,
       };
     });
 

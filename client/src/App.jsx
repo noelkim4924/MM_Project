@@ -5,6 +5,7 @@ import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
 import AdminPage from "./pages/AdminPage";
+import AdminEditUser from "./components/admin/AdminEditUser";
 import { useAuthStore } from "./store/useAuthStore";
 import { useNotificationStore } from "./store/useNotificationStore";
 import { useEffect } from "react";
@@ -81,12 +82,13 @@ function App() {
   return (
     <div className="absolute inset-0 -z-10 h-full w-full bg-white">
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/home" element={authUser ? <HomePage /> : <Navigate to="/" />} />
-        <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} />
-        <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} />
-        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} />
+        <Route path="/" element={<LandingPage />} /> {/* 랜딩 페이지 */}
+        <Route path="/home" element={authUser ? <HomePage /> : <Navigate to="/" />} /> {/* 홈 페이지 */}
+        <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} /> {/* 인증 페이지 */}
+        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} /> {/* 프로필 페이지 */}
+        <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} /> {/* 채팅 페이지 */}
+        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} /> {/* 관리자 페이지 */}
+        <Route path="/admin/edit-user/:id" element={<AdminEditUser />} />
       </Routes>
       <Toaster />
     </div>
