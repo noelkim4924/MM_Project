@@ -1,4 +1,4 @@
-// ConfirmToast.jsx
+// src/components/admin/ConfirmToast.jsx
 import React from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 
@@ -7,9 +7,12 @@ import { CheckCircle, XCircle } from "lucide-react";
  * - "type" prop: "verify" or "decline"
  * - "message": 표시할 메시지
  * - "onConfirm", "onCancel": 버튼 클릭 시 동작
+ * - "isOpen": 토스트 표시 여부 (기본값: true)
  */
-function ConfirmToast({ type, message, onConfirm, onCancel }) {
-  // type에 따라 색상, 아이콘 다르게
+function ConfirmToast({ type, message, onConfirm, onCancel, isOpen = true }) {
+  // isOpen이 false면 렌더링하지 않음
+  if (!isOpen) return null;
+
   let borderColor = "border-green-500";
   let textColor = "text-green-500";
   let IconComponent = CheckCircle;
@@ -27,7 +30,7 @@ function ConfirmToast({ type, message, onConfirm, onCancel }) {
         bg-white border-l-4 ${borderColor}
         rounded-md px-6 py-4 shadow-md z-50
         flex items-start space-x-3
-        w-[400px]  // 박스 폭을 400px 정도로 키움
+        w-[400px]
       `}
     >
       {/* 아이콘 영역 */}

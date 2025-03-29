@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useMessageStore } from "../store/useMessageStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Header } from "../components/Header";
 import MessageInput from "../components/MessageInput";
 import { axiosInstance } from "../lib/axios";
+import ConfirmToast from "../components/admin/ConfirmToast";
 
 const ChatPage = () => {
-  const { id: chatPartnerId } = useParams(); // URL의 :id가 채팅 상대의 ID
+  const { id: chatPartnerId } = useParams();
   const { authUser } = useAuthStore();
   const { messages, getMessages, subscribeToMessages, unsubscribeFromMessages, loading } = useMessageStore();
+  const navigate = useNavigate();
   const [chatPartner, setChatPartner] = useState(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
 
-  // 채팅 상대 프로필 데이터 불러오기 (예: /users/:id 엔드포인트)
   useEffect(() => {
     if (chatPartnerId) {
       axiosInstance
@@ -29,15 +31,26 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (authUser && chatPartnerId) {
-      // 대화 기록 불러오기
       getMessages(chatPartnerId);
-      // 새 메시지 수신 구독
       subscribeToMessages();
     }
     return () => {
       unsubscribeFromMessages();
     };
   }, [authUser, chatPartnerId, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+
+  const handleLeaveChat = () => {
+    setIsToastOpen(true);
+  };
+
+  const confirmLeave = () => {
+    setIsToastOpen(false);
+    navigate(-1);
+  };
+
+  const closeToast = () => {
+    setIsToastOpen(false);
+  };
 
   if (loading) {
     return (
@@ -52,14 +65,23 @@ const ChatPage = () => {
       <Header />
       <div className="flex-grow flex flex-col max-w-4xl mx-auto w-full p-4">
         <div className="flex items-center mb-4 bg-white rounded-lg shadow p-3">
-          <img
-            src={chatPartner && chatPartner.image ? chatPartner.image : "/avatar.png"}
-            alt="Chat Partner"
-            className="w-12 h-12 object-cover rounded-full mr-3 border-2 border-green-300"
-          />
-          <h2 className="text-xl font-semibold text-gray-800">
-            Chat with {chatPartner ? chatPartner.name : chatPartnerId}
-          </h2>
+          <div className="flex items-center">
+            <img
+              src={chatPartner && chatPartner.image ? chatPartner.image : "/avatar.png"}
+              alt="Chat Partner"
+              className="w-12 h-12 object-cover rounded-full mr-3 border-2 border-green-300"
+            />
+            <h2 className="text-xl font-semibold text-gray-800">
+              Chat with {chatPartner ? chatPartner.name : chatPartnerId}
+            </h2>
+          </div>
+          {/* Leave 버튼을 오른쪽 끝으로 고정 */}
+          <button
+            onClick={handleLeaveChat}
+            className="ml-auto px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300"
+          >
+            Leave
+          </button>
         </div>
 
         <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg shadow p-4">
@@ -88,6 +110,15 @@ const ChatPage = () => {
         </div>
         <MessageInput chatPartnerId={chatPartnerId} />
       </div>
+
+      {/* ConfirmToast 표시 */}
+      <ConfirmToast
+        type="decline"
+        message="are you really want to leave this chat?"
+        onConfirm={confirmLeave}
+        onCancel={closeToast}
+        isOpen={isToastOpen}
+      />
     </div>
   );
 };
