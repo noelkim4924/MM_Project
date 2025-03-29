@@ -1,3 +1,4 @@
+// src/store/useMessageStore.js
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -15,7 +16,6 @@ export const useMessageStore = create((set) => ({
         toast.error("User not authenticated");
         return;
       }
-      // Immediately add message to state for instant UI feedback
       set((state) => ({
         messages: [
           ...state.messages,
@@ -52,5 +52,10 @@ export const useMessageStore = create((set) => ({
   unsubscribeFromMessages: () => {
     const socket = getSocket();
     socket.off("newMessage");
+  },
+
+  // 대화 기록 삭제 후 메시지 상태 초기화 함수 추가
+  clearMessages: () => {
+    set({ messages: [] });
   },
 }));

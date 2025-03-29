@@ -1,4 +1,4 @@
-
+// src/api/controllers/matchController.js
 import User from "../models/User.js";
 import ChatRequest from "../models/ChatRequest.js";
 import { getIO, getConnectedUsers } from "../socket/socket.server.js";
@@ -6,7 +6,7 @@ import { getIO, getConnectedUsers } from "../socket/socket.server.js";
 export const acceptChatRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
-    const userId = req.user._id; // 인증된 사용자 (멘토)
+    const userId = req.user._id;
 
     const chatRequest = await ChatRequest.findById(requestId).populate("menteeId mentorId");
     if (!chatRequest || chatRequest.mentorId.toString() !== userId.toString()) {
@@ -17,11 +17,9 @@ export const acceptChatRequest = async (req, res) => {
       return res.status(400).json({ message: "Request already processed" });
     }
 
-    // 상태 업데이트
     chatRequest.status = "accepted";
     await chatRequest.save();
 
-    // 양쪽에 매칭 추가
     await Promise.all([
       User.updateOne(
         { _id: chatRequest.menteeId._id },
@@ -33,7 +31,6 @@ export const acceptChatRequest = async (req, res) => {
       ),
     ]);
 
-    // 소켓 알림
     const io = getIO();
     const connectedUsersMap = getConnectedUsers();
     const menteeSocketId = connectedUsersMap.get(chatRequest.menteeId._id.toString());
@@ -62,7 +59,6 @@ export const acceptChatRequest = async (req, res) => {
   }
 };
 
-// 기존 함수 유지
 export const swipeRight = async (req, res) => {
   try {
     const { likedUserId } = req.params;
@@ -101,17 +97,14 @@ export const getMatches = async (req, res) => {
   }
 };
 
-// matchController.js
-
 export const getUserProfiles = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user._id);
     const { category, role } = req.query;
     const userId = req.user._id;
-    
+
     let users;
     try {
-      // 기본 쿼리: 조건에 맞는 멘토(또는 role이 지정된 사용자) 검색
       users = await User.find({
         role: role || "mentor",
         categories: category,
@@ -120,16 +113,13 @@ export const getUserProfiles = async (req, res) => {
       }).select("name image age");
     } catch (err) {
       console.error("Primary query failed, falling back to alternative query", err);
-      // 기본 조건: 자기 자신 제외, 이미 매칭된 사용자 제외
       const conditions = [
         { _id: { $ne: currentUser._id } },
         { _id: { $nin: currentUser.matches } },
       ];
-      // role이 제공되면 필터링 (mentor 또는 mentee)
       if (role) {
         conditions.push({ role });
       }
-      // category가 제공되면, categories 배열 내에 { categoryId: category, status: 'verified' } 조건 추가
       if (category) {
         conditions.push({
           categories: {
@@ -142,7 +132,7 @@ export const getUserProfiles = async (req, res) => {
       }
       users = await User.find({ $and: conditions });
     }
-    
+
     return res.status(200).json({ users });
   } catch (error) {
     console.log("Error in getUserProfiles controller: ", error);
@@ -150,6 +140,45 @@ export const getUserProfiles = async (req, res) => {
       success: false,
       message: "Internal Server Error",
       error: error.message,
+    });
+  }
+};
+
+// 매칭 해제 API 추가
+export const unmatchUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // 현재 유저의 matches에서 userId 제거
+    await User.updateOne(
+      { _id: req.user._id },
+      { $pull: { matches: userId } }
+    );
+
+    // 상대 유저의 matches에서도 현재 유저 제거
+    await User.updateOne(
+      { _id: userId },
+      { $pull: { matches: req.user._id } }
+    );
+
+    // 소켓 알림 (매칭 해제 알림)
+    const io = getIO();
+    const connectedUsersMap = getConnectedUsers();
+    const userSocketId = connectedUsersMap.get(userId);
+    if (userSocketId) {
+      io.to(userSocketId).emit("matchRemoved", {
+        userId: req.user._id,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Unmatched successfully",
+    });
+  } catch (error) {
+    console.log("Error in unmatchUser:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };

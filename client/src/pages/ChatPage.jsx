@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { useMessageStore } from "../store/useMessageStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useMatchStore } from "../store/useMatchStore";
 import { Header } from "../components/Header";
 import MessageInput from "../components/MessageInput";
 import { axiosInstance } from "../lib/axios";
@@ -11,7 +12,8 @@ import ConfirmToast from "../components/admin/ConfirmToast";
 const ChatPage = () => {
   const { id: chatPartnerId } = useParams();
   const { authUser } = useAuthStore();
-  const { messages, getMessages, subscribeToMessages, unsubscribeFromMessages, loading } = useMessageStore();
+  const { messages, getMessages, subscribeToMessages, unsubscribeFromMessages, loading, clearMessages } = useMessageStore();
+  const { removeMatch } = useMatchStore();
   const navigate = useNavigate();
   const [chatPartner, setChatPartner] = useState(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -43,9 +45,22 @@ const ChatPage = () => {
     setIsToastOpen(true);
   };
 
-  const confirmLeave = () => {
-    setIsToastOpen(false);
-    navigate(-1);
+  const confirmLeave = async () => {
+    try {
+      // 대화 기록 삭제
+      await axiosInstance.delete(`/messages/conversation/${chatPartnerId}`);
+      // 매칭 해제
+      await axiosInstance.post(`/matches/unmatch/${chatPartnerId}`);
+      // 상태 초기화
+      clearMessages(); // 메시지 상태 초기화
+      removeMatch(chatPartnerId); // 매칭 상태에서 제거
+      setIsToastOpen(false);
+      navigate("/home");
+    } catch (error) {
+      console.error("Error leaving chat:", error);
+      setIsToastOpen(false);
+      toast.error("Failed to leave chat. Please try again.");
+    }
   };
 
   const closeToast = () => {
@@ -75,7 +90,6 @@ const ChatPage = () => {
               Chat with {chatPartner ? chatPartner.name : chatPartnerId}
             </h2>
           </div>
-          {/* Leave 버튼을 오른쪽 끝으로 고정 */}
           <button
             onClick={handleLeaveChat}
             className="ml-auto px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300"
@@ -111,7 +125,6 @@ const ChatPage = () => {
         <MessageInput chatPartnerId={chatPartnerId} />
       </div>
 
-      {/* ConfirmToast 표시 */}
       <ConfirmToast
         type="decline"
         message="are you really want to leave this chat?"

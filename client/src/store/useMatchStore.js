@@ -1,3 +1,4 @@
+// src/store/useMatchStore.js
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -11,8 +12,8 @@ export const useMatchStore = create((set) => ({
   userProfiles: [],
 
   getMyMatches: async () => {
-    const { authUser } = useAuthStore.getState(); // 로그인 상태 확인
-    if (!authUser) return; // 로그인한 유저가 없으면 요청 안 보냄
+    const { authUser } = useAuthStore.getState();
+    if (!authUser) return;
 
     set({ isLoadingMyMatches: true });
     try {
@@ -21,7 +22,7 @@ export const useMatchStore = create((set) => ({
     } catch (err) {
       console.error("Error fetching matches:", err);
       set({ matches: [] });
-      if (err.response?.status === 401) return; // 인증 오류 메시지 출력 안 함
+      if (err.response?.status === 401) return;
       toast.error(err.response?.data?.message || "Something went wrong");
     } finally {
       set({ isLoadingMyMatches: false });
@@ -29,8 +30,8 @@ export const useMatchStore = create((set) => ({
   },
 
   getUserProfiles: async () => {
-    const { authUser } = useAuthStore.getState(); // 로그인 상태 확인
-    if (!authUser) return; // 로그인한 유저가 없으면 요청 안 보냄
+    const { authUser } = useAuthStore.getState();
+    if (!authUser) return;
 
     try {
       set({ isLoadingUserProfiles: true });
@@ -38,7 +39,7 @@ export const useMatchStore = create((set) => ({
       set({ userProfiles: res.data.users || [] });
     } catch (error) {
       set({ userProfiles: [] });
-      if (error.response?.status === 401) return; // 인증 오류 메시지 출력 안 함
+      if (error.response?.status === 401) return;
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isLoadingUserProfiles: false });
@@ -47,7 +48,6 @@ export const useMatchStore = create((set) => ({
 
   addMatchFromNotification: async (mentorId, mentorName, mentorImage) => {
     try {
-      // 백엔드에 매칭 추가 요청
       await axiosInstance.post("/matches/add", { mentorId });
       set((state) => {
         const existingMatch = state.matches.find((match) => match._id === mentorId);
@@ -64,6 +64,13 @@ export const useMatchStore = create((set) => ({
     } catch (err) {
       console.error("Error adding match:", err);
     }
+  },
+
+  // 매칭 해제 후 상태 업데이트 함수 추가
+  removeMatch: (userId) => {
+    set((state) => ({
+      matches: state.matches.filter((match) => match._id !== userId),
+    }));
   },
 }));
 
