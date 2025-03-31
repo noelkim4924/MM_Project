@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { axiosInstance } from '../../lib/axios';
+import { axiosInstance } from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
@@ -13,8 +13,9 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setSearch("");
     setCurrentPage(1);
-    fetchUsers(1, selectedRole, search);
+    fetchUsers(1, selectedRole, "");
   }, [selectedRole]);
 
   const handleSearch = () => {
@@ -26,13 +27,19 @@ const UserManagement = () => {
     console.log("fetchUsers called with", page, role, searchValue);
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/admin/users", {
-        params: {
-          role,
-          search: searchValue,
-          page,
+      const timestamp = new Date().getTime(); 
+
+      const res = await axiosInstance.get(`/admin/users?t=${timestamp}`, {
+        params: { role, search: searchValue, page },
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       });
+
+      console.log("API Response:", res);
+
       if (res.data.success) {
         setUsers(res.data.data || []);
         setCurrentPage(res.data.currentPage);
@@ -41,7 +48,7 @@ const UserManagement = () => {
         toast.error("Failed to fetch users");
       }
     } catch (error) {
-      console.error("Error fetching users:", error.response ? error.response.data : error.message);
+      console.error("Error fetching users:", error);
       toast.error(error.response?.data?.message || "Error fetching users");
     } finally {
       setLoading(false);
@@ -62,25 +69,22 @@ const UserManagement = () => {
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">User Management</h2>
 
+      {/* Role Selection */}
       <div className="flex space-x-2 mb-4">
-        <button
-          className={`px-4 py-2 rounded ${
-            selectedRole === "mentor" ? "bg-blue-500 text-white" : "bg-gray-300"
-          }`}
-          onClick={() => setSelectedRole("mentor")}
-        >
-          Mentors
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${
-            selectedRole === "mentee" ? "bg-blue-500 text-white" : "bg-gray-300"
-          }`}
-          onClick={() => setSelectedRole("mentee")}
-        >
-          Mentees
-        </button>
+        {["mentor", "mentee"].map((role) => (
+          <button
+            key={role}
+            className={`px-4 py-2 rounded ${
+              selectedRole === role ? "bg-blue-500 text-white" : "bg-gray-300"
+            }`}
+            onClick={() => setSelectedRole(role)}
+          >
+            {role.charAt(0).toUpperCase() + role.slice(1)}s
+          </button>
+        ))}
       </div>
 
+      {/* Search */}
       <div className="flex space-x-2 mb-4">
         <input
           type="text"
@@ -97,6 +101,7 @@ const UserManagement = () => {
         </button>
       </div>
 
+      {/* Users Table */}
       {loading ? (
         <div>Loading...</div>
       ) : (
@@ -109,24 +114,33 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u._id} className="border-b">
-                <td className="p-2">{u.name}</td>
-                <td className="p-2">{u.email}</td>
-                <td className="p-2">
-                  <button
-                    onClick={() => handleDetail(u._id)}
-                    className="px-3 py-1 bg-blue-500 text-white rounded"
-                  >
-                    Detail
-                  </button>
+            {users.length > 0 ? (
+              users.map((u) => (
+                <tr key={u._id} className="border-b">
+                  <td className="p-2">{u.name}</td>
+                  <td className="p-2">{u.email}</td>
+                  <td className="p-2">
+                    <button
+                      onClick={() => handleDetail(u._id)}
+                      className="px-3 py-1 bg-blue-500 text-white rounded"
+                    >
+                      Detail
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="p-4 text-center text-gray-500">
+                  No users found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       )}
 
+      {/* Pagination */}
       <div className="mt-4 flex space-x-2">
         <button
           onClick={() => goToPage(currentPage - 1)}
