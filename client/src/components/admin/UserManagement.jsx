@@ -41,8 +41,8 @@ const UserManagement = () => {
         toast.error("Failed to fetch users");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Error fetching users");
+      console.error("Error fetching users:", error.response ? error.response.data : error.message);
+      toast.error(error.response?.data?.message || "Error fetching users");
     } finally {
       setLoading(false);
     }
