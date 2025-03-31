@@ -88,6 +88,12 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
                 >
                   User History
                 </li>
+                <li 
+                  className={`cursor-pointer p-2 rounded-md ${selectedTab === "categories" ? "bg-blue-200 text-black" : ""}`} 
+                  onClick={() => setSelectedTab("categories")}
+                >
+                  Category Management
+                </li>
               </ul>
             </div>
           ) : null}

@@ -6,6 +6,9 @@ import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
 import AdminPage from "./pages/AdminPage";
 import AdminEditUser from "./components/admin/AdminEditUser";
+import PasswordChange from "./components/PasswordChange";
+import RequestPasswordReset from "./pages/RequestPasswordReset"; 
+import ResetPassword from "./pages/ResetPassword"; 
 import { useAuthStore } from "./store/useAuthStore";
 import { useNotificationStore } from "./store/useNotificationStore";
 import { useEffect } from "react";
@@ -89,6 +92,9 @@ function App() {
         <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} /> {/* 채팅 페이지 */}
         <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} /> {/* 관리자 페이지 */}
         <Route path="/admin/edit-user/:id" element={<AdminEditUser />} />
+        <Route path="/change-password" element={authUser ? <PasswordChange /> : <Navigate to="/auth" />} />
+        <Route path="/request-password-reset" element={<RequestPasswordReset />} /> 
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
       <Toaster />
     </div>

@@ -5,6 +5,7 @@ import UnverifiedUsers from "../components/admin/UnverifiedUsers";
 import UserManagement from "../components/admin/UserManagement";
 import Reports from "../components/admin/Reports";
 import UserHistory from "../components/admin/UserHistory";
+import CategoryManagement from "../components/admin/CategoryManagement";
 
 const AdminPage = () => {
   const [selectedTab, setSelectedTab] = useState("unverified"); // 🟢 선택된 탭 상태 관리
@@ -18,6 +19,8 @@ const AdminPage = () => {
         return <UserManagement />;
       case "history":
         return <UserHistory />;
+      case "categories":
+        return <CategoryManagement />;
       default:
         return <UnverifiedUsers />;
     }

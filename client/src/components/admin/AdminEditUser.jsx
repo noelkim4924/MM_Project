@@ -21,7 +21,7 @@ const AdminEditUser = () => {
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/admin/users/${id}`, {
+        const res = await axios.get(`http://localhost:5001/api/users/admin/users/${id}`, {
           withCredentials: true,
         });
         if (res.data.success) {
@@ -50,7 +50,7 @@ const AdminEditUser = () => {
 
   const handleResetImage = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/users/admin/users/${id}`, {
+      await axios.put(`http://localhost:5001/api/users/admin/users/${id}`, {
         resetImage: true,
       }, { withCredentials: true });
       toast.success("Image reset to default");
@@ -84,7 +84,7 @@ const AdminEditUser = () => {
     e.preventDefault();
     const updatedData = { name, age, gender, bio, categories, image, role };
     try {
-      await axios.put(`http://localhost:5000/api/users/admin/users/${id}`, updatedData, { withCredentials: true });
+      await axios.put(`http://localhost:5001/api/users/admin/users/${id}`, updatedData, { withCredentials: true });
       toast.success("User updated successfully");
       navigate(`/admin/edit-user/${id}`); // Reload the page with the current user ID
     } catch (error) {
