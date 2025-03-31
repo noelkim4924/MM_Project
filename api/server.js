@@ -14,12 +14,15 @@ import logRoutes from './routes/logRoutes.js';
 
 import { connectDB } from "./config/db.js";
 import { initializeSocket } from "./socket/socket.server.js";
+import path from 'path';
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 5001;
+
+const __dirname = path.resolve();
 
 
 console.log("CLIENT_URL:", process.env.CLIENT_URL);
@@ -43,6 +46,15 @@ app.use("/api/matches", matchRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use('/api/logs', logRoutes);
+
+if(process.env.NODE_ENV === "production") {
+
+  app.use(express.static(path.join(__dirname, '/client/dist')));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+  });
+}
 
 
 const startServer = async () => {

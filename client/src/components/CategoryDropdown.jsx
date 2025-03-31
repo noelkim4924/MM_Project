@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { axiosInstance } from '../lib/axios';
 
-// CategoryDropdown.jsx (수정 후)
 const CategoryDropdown = ({ selectedCategories, onCategoryChange, onRemoveCategory }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,13 +9,8 @@ const CategoryDropdown = ({ selectedCategories, onCategoryChange, onRemoveCatego
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("http://localhost:5001/api/categories", {
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        const categoryData = data.data || [];
+        const response = await axiosInstance.get("/categories");
+        const categoryData = response.data.data || [];
         setCategories(categoryData);
       } catch (err) {
         setError(err.message);
@@ -30,12 +25,12 @@ const CategoryDropdown = ({ selectedCategories, onCategoryChange, onRemoveCatego
     const selectedSubcategoryId = e.target.value;
     if (!selectedSubcategoryId) return;
 
-    // ✅ 기존 selectedCategories: [{ categoryId, status }, ...]
+  
     const alreadyExists = selectedCategories.some(
       (cat) => cat.categoryId === selectedSubcategoryId
     );
     if (!alreadyExists) {
-      // 새로 추가: status = 'pending'
+ 
       const newCat = {
         categoryId: selectedSubcategoryId,
         status: 'pending',
@@ -77,12 +72,12 @@ const CategoryDropdown = ({ selectedCategories, onCategoryChange, onRemoveCatego
       <div className="mt-2 space-y-2">
         {selectedCategories.map((cat, index) => {
           // cat: { categoryId, status }
-          // 실제 subcategory 이름 찾기
+        
           const subcategory = categories
             .flatMap((catObj) => catObj.subcategories)
             .find((sub) => sub._id === cat.categoryId);
 
-          // 상태별 배경색(선택사항)
+    
           let bgColor = "bg-gray-100";
           if (cat.status === "pending") bgColor = "bg-yellow-100";
           if (cat.status === "verified") bgColor = "bg-green-100";

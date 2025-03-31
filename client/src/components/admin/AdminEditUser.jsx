@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { axiosInstance } from '../lib/axios';
 import { toast } from "react-hot-toast";
-import CategoryDropdown from "../CategoryDropdown"; // Import CategoryDropdown
+import CategoryDropdown from "../CategoryDropdown";
+
 
 const AdminEditUser = () => {
   const { id } = useParams();
@@ -21,9 +22,7 @@ const AdminEditUser = () => {
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/users/admin/users/${id}`, {
-          withCredentials: true,
-        });
+        const res = await axiosInstance.get(`/admin/users/${id}`);
         if (res.data.success) {
           const userData = res.data.data;
           setUser(userData);
@@ -50,11 +49,9 @@ const AdminEditUser = () => {
 
   const handleResetImage = async () => {
     try {
-      await axios.put(`http://localhost:5001/api/users/admin/users/${id}`, {
-        resetImage: true,
-      }, { withCredentials: true });
+      await axiosInstance.put(`/admin/users/${id}`, { resetImage: true });
       toast.success("Image reset to default");
-      fetchUserDetail(); // 다시 불러오기
+      fetchUserDetail();
     } catch (error) {
       console.error(error);
       toast.error("Failed to reset image");
@@ -84,9 +81,9 @@ const AdminEditUser = () => {
     e.preventDefault();
     const updatedData = { name, age, gender, bio, categories, image, role };
     try {
-      await axios.put(`http://localhost:5001/api/users/admin/users/${id}`, updatedData, { withCredentials: true });
+      await axiosInstance.put(`/admin/users/${id}`, updatedData);
       toast.success("User updated successfully");
-      navigate(`/admin/edit-user/${id}`); // Reload the page with the current user ID
+      navigate(`/admin/edit-user/${id}`);
     } catch (error) {
       console.error(error);
       toast.error("Failed to update user");

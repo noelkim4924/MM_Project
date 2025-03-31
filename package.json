@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon api/server.js"
+    "dev": "nodemon api/server.js" ,
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
+    "start": "node api/server.js"
   },
   "keywords": [],
   "author": "",

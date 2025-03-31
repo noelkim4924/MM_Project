@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { axiosInstance } from '../lib/axios';
 
 const UserHistory = () => {
   const [logs, setLogs] = useState([]);
@@ -8,12 +8,12 @@ const UserHistory = () => {
     const fetchLogs = async () => {
       try {
         console.log('Fetching logs from API...');
-        const response = await axios.get('http://localhost:5001/api/logs'); // Ensure the correct URL
+        const response = await axiosInstance.get('/logs');
         console.log('Logs fetched:', response.data);
         setLogs(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error('Failed to fetch logs', error);
-        setLogs([]); // Ensure logs is an array even if the fetch fails
+        setLogs([]);
       }
     };
 

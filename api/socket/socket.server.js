@@ -21,7 +21,7 @@ export const initializeSocket = (httpServer) => {
     console.log(`User connected: ${socket.userId}`);
     connectedUsers.set(socket.userId, socket.id);
 
-    // 멘티가 멘토에게 채팅 요청
+
     socket.on("requestChat", async ({ menteeId, mentorId }) => {
       try {
         const chatRequest = new ChatRequest({ menteeId, mentorId });
@@ -47,7 +47,7 @@ export const initializeSocket = (httpServer) => {
         if (!chatRequest) throw new Error("Chat request not found");
     
         if (status === "accepted") {
-          // 멘티와 멘토의 matches에 서로를 추가
+      
           await Promise.all([
             User.updateOne(
               { _id: chatRequest.menteeId._id },
@@ -60,7 +60,7 @@ export const initializeSocket = (httpServer) => {
           ]);
         }
     
-        // 기존 알림 전송 로직은 유지
+   
       } catch (err) {
         console.error("Error processing respondChat:", err);
       }

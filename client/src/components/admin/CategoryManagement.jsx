@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { axiosInstance } from '../lib/axios';
 import { toast } from 'react-hot-toast';
 
 const CategoryManagement = () => {
@@ -13,10 +13,7 @@ const CategoryManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/api/categories', {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
+      const response = await axiosInstance.get('/categories');
       console.log('Full response:', response);
       if (response.data && response.data.success) {
         console.log('Fetched categories:', response.data.data);
@@ -49,14 +46,10 @@ const CategoryManagement = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5001/api/categories', newCategory, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-
+      const response = await axiosInstance.post('/categories', newCategory);
       if (response.data && response.data.success) {
         console.log('Updated categories after adding category:', response.data.data);
-        fetchCategories(); // Refetch categories after adding
+        fetchCategories();
         setNewCategory({ name: '', subcategories: [''] });
       } else {
         console.error('Unexpected response structure:', response.data);
@@ -70,14 +63,10 @@ const CategoryManagement = () => {
     if (!editCategory[categoryId]) return;
 
     try {
-      const response = await axios.put(`http://localhost:5001/api/categories/${categoryId}`, editCategory[categoryId], {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-
+      const response = await axiosInstance.put(`/categories/${categoryId}`, editCategory[categoryId]);
       if (response.data && response.data.success) {
         console.log('Updated categories after editing category:', response.data.data);
-        fetchCategories(); // Refetch categories after editing
+        fetchCategories();
         setEditCategory({ ...editCategory, [categoryId]: undefined });
       } else {
         console.error('Unexpected response structure:', response.data);
@@ -95,14 +84,10 @@ const CategoryManagement = () => {
           onClick={async () => {
             toast.dismiss(t.id);
             try {
-              const response = await axios.delete(`http://localhost:5001/api/categories/${categoryId}`, {
-                headers: { "Content-Type": "application/json" },
-                withCredentials: true,
-              });
-
+              const response = await axiosInstance.delete(`/categories/${categoryId}`);
               if (response.data && response.data.success) {
                 console.log('Updated categories after deleting category:', response.data.data);
-                fetchCategories(); // Refetch categories after deleting
+                fetchCategories();
                 toast.success('Category deleted successfully');
               } else {
                 console.error('Unexpected response structure:', response.data);
@@ -134,16 +119,12 @@ const CategoryManagement = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:5001/api/categories/${categoryId}/subcategories`, {
+      const response = await axiosInstance.post(`/categories/${categoryId}/subcategories`, {
         name: newSubcategory[categoryId],
-      }, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
       });
-
       if (response.data && response.data.success) {
         console.log('Updated categories after adding subcategory:', response.data.data);
-        fetchCategories(); // Refetch categories after adding
+        fetchCategories();
         setNewSubcategory({ ...newSubcategory, [categoryId]: '' });
       } else {
         console.error('Unexpected response structure:', response.data);
@@ -157,16 +138,12 @@ const CategoryManagement = () => {
     if (!editSubcategory[subcategoryId]) return;
 
     try {
-      const response = await axios.put(`http://localhost:5001/api/categories/${categoryId}/subcategories/${subcategoryId}`, {
+      const response = await axiosInstance.put(`/categories/${categoryId}/subcategories/${subcategoryId}`, {
         name: editSubcategory[subcategoryId],
-      }, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
       });
-
       if (response.data && response.data.success) {
         console.log('Updated categories after editing subcategory:', response.data.data);
-        fetchCategories(); // Refetch categories after editing
+        fetchCategories();
         setEditSubcategory({ ...editSubcategory, [subcategoryId]: undefined });
       } else {
         console.error('Unexpected response structure:', response.data);
@@ -184,14 +161,10 @@ const CategoryManagement = () => {
           onClick={async () => {
             toast.dismiss(t.id);
             try {
-              const response = await axios.delete(`http://localhost:5001/api/categories/${categoryId}/subcategories/${subcategoryId}`, {
-                headers: { "Content-Type": "application/json" },
-                withCredentials: true,
-              });
-
+              const response = await axiosInstance.delete(`/categories/${categoryId}/subcategories/${subcategoryId}`);
               if (response.data && response.data.success) {
                 console.log('Updated categories after deleting subcategory:', response.data.data);
-                fetchCategories(); // Refetch categories after deleting
+                fetchCategories();
                 toast.success('Subcategory deleted successfully');
               } else {
                 console.error('Unexpected response structure:', response.data);
