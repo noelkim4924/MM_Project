@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import { useAuthStore } from "../store/useAuthStore";
-import { axiosInstance } from "../lib/axios";
+import { axiosInstance } from '../lib/axios'; 
 
 const PasswordChange = () => {
   const { authUser } = useAuthStore();

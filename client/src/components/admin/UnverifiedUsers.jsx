@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { axiosInstance } from '../lib/axios'; // Correct path as specified
+import { axiosInstance } from '../../lib/axios'; 
 import { CheckCircle, XCircle, Mail } from "lucide-react";
 import ConfirmToast from "./ConfirmToast";
 import { toast } from "react-hot-toast";
