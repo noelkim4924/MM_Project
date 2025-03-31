@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { axiosInstance } from '../lib/axios';
+import { axiosInstance } from '../../lib/axios';
 import { toast } from 'react-hot-toast';
 
 const CategoryManagement = () => {
