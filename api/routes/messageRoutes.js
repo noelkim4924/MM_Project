@@ -9,6 +9,6 @@ router.use(protectRoute);
 
 router.post("/send", sendMessage);
 router.get("/conversation/:userId", getConversation);
-router.delete("/conversation/:userId", deleteConversation); // 대화 삭제 라우트 추가
+router.delete("/conversation/:userId", deleteConversation); 
 
 export default router;

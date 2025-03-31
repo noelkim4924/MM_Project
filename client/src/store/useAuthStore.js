@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios';
 import toast from 'react-hot-toast';
 
-import { useMatchStore } from "./useMatchStore"; // 🟢 매칭 상태 가져오기
+import { useMatchStore } from "./useMatchStore"; 
 import { disconnectSocket, initializeSocket } from '../socket/socket.client';
 
 
@@ -52,7 +52,6 @@ export const useAuthStore = create((set) => ({
       if (res.status === 200) {
         set({ authUser: null });
 
-        // 🛑 로그아웃 시 matches와 userProfiles 초기화
         useMatchStore.getState().matches = [];
         useMatchStore.getState().userProfiles = [];
         useMatchStore.getState().isLoadingMyMatches = false;

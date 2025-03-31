@@ -7,7 +7,7 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
-  const [role, setRole] = useState(""); // role 상태 추가
+  const [role, setRole] = useState(""); 
 
   const { signup, loading } = useAuthStore();
 
@@ -16,7 +16,7 @@ const SignUpForm = () => {
       className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
-        signup({ name, email, password, gender, age, role }); // role 추가
+        signup({ name, email, password, gender, age, role });
       }}
     >
       {/* NAME */}

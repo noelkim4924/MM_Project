@@ -54,7 +54,7 @@ export const useMessageStore = create((set) => ({
     socket.off("newMessage");
   },
 
-  // 대화 기록 삭제 후 메시지 상태 초기화 함수 추가
+
   clearMessages: () => {
     set({ messages: [] });
   },

@@ -12,21 +12,21 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
   const toggleSidebar = () => setIsOpen(!isOpen);
 
   const { getMyMatches, matches, isLoadingMyMatches } = useMatchStore();
-  const { authUser } = useAuthStore(); // 로그인한 유저 정보 가져오기
+  const { authUser } = useAuthStore(); 
   const { notifications } = useNotificationStore();
 
   useEffect(() => {
     getMyMatches();
   }, [getMyMatches]);
 
-  // notifications 변경 시 매칭 목록 갱신
+
   useEffect(() => {
     if (notifications.some((notif) => notif.status === "accepted")) {
-      getMyMatches(); // 수락 시 매칭 목록 재조회
+      getMyMatches(); 
     }
   }, [notifications, getMyMatches]);
 
-  // 백엔드 매칭과 알림 매칭 병합 (중복 제거)
+
   const allMatches = [
     ...matches,
     ...notifications
@@ -60,7 +60,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
             </button>
           </div>
 
-          {/* 어드민이면 Admin Panel UI */}
+   
           {authUser?.name === "admin" ? (
             <div className="flex-grow overflow-y-auto p-4">
               <ul className="space-y-4">
@@ -98,7 +98,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
             </div>
           ) : null}
 
-          {/* non-admin 사용자: 중복된 매칭 목록 중 allMatches만 남김 */}
+ 
           {authUser?.name !== "admin" && (
             <div className="flex-grow overflow-y-auto p-4 z-10 relative">
               {isLoadingMyMatches ? (

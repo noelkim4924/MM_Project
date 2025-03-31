@@ -12,6 +12,6 @@ router.post("/swipe-right/:likedUserId", swipeRight);
 router.post("/swipe-left/:likedUserId", swipeLeft);
 router.get("/my-matches", getMatches);
 router.get("/user-profiles", getUserProfiles);
-router.post("/unmatch/:userId", unmatchUser); // 매칭 해제 라우트 추가
+router.post("/unmatch/:userId", unmatchUser);
 
 export default router;

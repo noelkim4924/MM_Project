@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { toast } from 'react-hot-toast';
 
 export const useNotificationStore = create((set) => ({
-  notifications: [], // 알림 목록
+  notifications: [],
 
   addNotification: (notification) => {
     set((state) => ({
@@ -25,6 +25,6 @@ export const useNotificationStore = create((set) => ({
     set((state) => ({
       notifications: state.notifications.filter((notif) => notif.requestId !== requestId),
     }));
-    toast.success(`채팅 요청을 ${status === 'accepted' ? '수락' : '거절'}했습니다.`);
+    toast.success(`The chat request has been ${status === 'accepted' ? 'accepted' : 'declined'}.`);
   },
 }));

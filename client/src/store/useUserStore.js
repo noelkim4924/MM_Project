@@ -27,24 +27,23 @@ export const useUserStore = create((set) => ({
     }
   },
 
-// useUserStore.js (수정 후)
+
 updateProfile: async (data) => {
   try {
     set({ loading: true });
     console.log("Updating profile with data:", data);
     const res = await axiosInstance.put("/users/update", data);
-    
-    // ✅ 디버깅: 응답 코드/데이터 확인
+
     console.log("updateProfile response status:", res.status);
     console.log("updateProfile response data:", res.data);
 
     if (res.status === 200 && res.data.success) {
-      // 정상
+    
       useAuthStore.getState().setAuthUser(res.data.data);
       set({ profile: res.data.data });
       toast.success(res.data.message || "Profile updated successfully");
     } else {
-      // 혹시 success=false 이거나 status 200인데 뭔가 문제인 경우
+    
       console.warn("Unexpected success=false or missing data:", res.data);
       toast.error(res.data.message || "Something went wrong");
     }
@@ -60,7 +59,7 @@ updateProfile: async (data) => {
   requestCategoryVerification: async () => {
     try {
       set({ loading: true });
-      // 👇 PUT -> POST로 변경
+
       const res = await axiosInstance.post("/users/request-category-verification");
       toast.success("Verification request sent to admin");
     } catch (error) {

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Message from '../models/Message.js';
-import User from '../models/User.js'; // User 모델 가져오기
+import User from '../models/User.js';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -17,11 +17,11 @@ const seedMessages = async () => {
 
     await Message.deleteMany({});
 
-    // 기존 멘토 중 하나 선택 (예: James의 _id)
+
     const receiverUser = await User.findOne({ name: 'James' });
     if (!receiverUser) throw new Error('No receiver user found');
     const receiverId = receiverUser._id;
-    const senderId = "67d2c49e371297ace224d4b2"; // 예시 sender ID (James)
+    const senderId = "67d2c49e371297ace224d4b2";
 
     const dummyMessages = [
       {

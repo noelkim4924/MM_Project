@@ -66,7 +66,7 @@ export const useMatchStore = create((set) => ({
     }
   },
 
-  // 매칭 해제 후 상태 업데이트 함수 추가
+
   removeMatch: (userId) => {
     set((state) => ({
       matches: state.matches.filter((match) => match._id !== userId),

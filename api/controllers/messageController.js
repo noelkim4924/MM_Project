@@ -58,11 +58,11 @@ export const getConversation = async (req, res) => {
   }
 };
 
-// 대화 삭제 API 추가
+
 export const deleteConversation = async (req, res) => {
   const { userId } = req.params;
   try {
-    // 현재 유저와 특정 유저 간의 대화 기록 삭제
+   
     await Message.deleteMany({
       $or: [
         { sender: req.user._id, receiver: userId },

@@ -22,9 +22,7 @@ const ProfilePage = () => {
     message: "",
     onConfirm: null,
   });
-  /**
-   * ✅ categories를 [ { categoryId, status }, ... ] 형태로 관리
-   */
+ 
   const [categories, setCategories] = useState([]);
   const [image, setImage] = useState(authUser?.image || null);
   const [role, setRole] = useState(authUser?.role || "");
@@ -45,29 +43,21 @@ const ProfilePage = () => {
       setAge(profile.age || authUser?.age || "");
       setGender(profile.gender || authUser?.gender || "");
       setBio(profile.bio || "");
-      /**
-       * ✅ profile.categories가 이미 [{ categoryId, status }, ...] 형태
-       *    그대로 state에 저장
-       */
+     
       setCategories(profile.categories || []);
       setImage(profile.image || authUser?.image || null);
       setRole(profile.role || authUser?.role || "");
     }
   }, [profile, authUser]);
 
-  /**
-   * ✅ Save 버튼 클릭 시
-   *    categories를 [ { categoryId, status }, ... ] 형태로 그대로 백엔드로 전송
-   */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const updatedData = { name, bio, categories, image };
     await updateProfile(updatedData);
   };
 
-  /**
-   * ✅ 이미지 변경 로직 (기존 코드 그대로)
-   */
+  
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -77,47 +67,40 @@ const ProfilePage = () => {
     }
   };
 
-  /**
-   * ✅ CategoryDropdown에서 새 배열을 받아 setCategories
-   *    (이미 [ { categoryId, status } ] 구조)
-   */
+ 
   const handleCategoryChange = (newCategories) => {
     setCategories(newCategories);
   };
 
-  /**
-   * ✅ Remove 버튼 클릭 시 해당 categoryId를 가진 항목만 제거
-   *    pending/verified/declined 전부 삭제 가능
-   */
-  const removeCategory = (categoryIdToRemove) => {
-    // 1) 해당 카테고리를 찾기
-    const catToRemove = categories.find((cat) => cat.categoryId === categoryIdToRemove);
-    if (!catToRemove) return; // 이미 없음
 
-    // 2) 만약 status === 'verified'라면 ConfirmToast를 띄운다
+  const removeCategory = (categoryIdToRemove) => {
+
+    const catToRemove = categories.find((cat) => cat.categoryId === categoryIdToRemove);
+    if (!catToRemove) return; 
+
     if (catToRemove.status === "verified") {
       setConfirmState({
         open: true,
-        type: "decline", // 빨간색
+        type: "decline",
         message: "Are you sure you want to remove this verified category? You will need to verify again if you add it back.",
         onConfirm: () => {
-          // 실제로 삭제 수행
+       
           setCategories((prev) =>
             prev.filter((cat) => cat.categoryId !== categoryIdToRemove)
           );
-          // 토스트 닫기
+        
           setConfirmState((prev) => ({ ...prev, open: false }));
         },
       });
     } else {
-      // 3) verified가 아니면 그냥 즉시 삭제
+  
       setCategories((prev) =>
         prev.filter((cat) => cat.categoryId !== categoryIdToRemove)
       );
     }
   };
 
-  // ConfirmToast에서 Cancel/Yes
+
   const closeConfirm = () => {
     setConfirmState((prev) => ({ ...prev, open: false }));
   };
@@ -250,7 +233,7 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* CATEGORIES (멘토일 때만) */}
+              {/* CATEGORIES (Mentor) */}
               {role === "mentor" && (
                 <CategoryDropdown
                   selectedCategories={categories}

@@ -11,9 +11,9 @@ export const initializeSocket = (userId) => {
 
   socket = io(SOCKET_URL, {
     auth: { userId },
-    reconnection: true, // 재연결 시도
-    reconnectionAttempts: 5, // 재연결 시도 횟수
-    reconnectionDelay: 1000, // 재연결 대기 시간
+    reconnection: true, 
+    reconnectionAttempts: 5, 
+    reconnectionDelay: 1000,  
   });
 
   socket.on("connect", () => {

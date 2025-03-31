@@ -10,21 +10,21 @@ const UserDetailModal = ({ user, onClose }) => {
 
   const handleRequestChat = () => {
     if (!authUser) {
-      toast.error("로그인이 필요합니다.");
+      toast.error("Login is required.");
       return;
     }
     const menteeId = authUser._id;
     try {
       const socket = getSocket();
       if (!socket.connected) {
-        toast.error("소켓 연결이 끊어졌습니다. 새로고침 후 다시 시도해주세요.");
+        toast.error("The socket connection was lost. Please refresh and try again.");
         return;
       }
       socket.emit("requestChat", { menteeId, mentorId: user._id });
-      toast.success("채팅 요청을 보냈습니다!");
+      toast.success("A chat request has been sent!");
       onClose();
     } catch (err) {
-      toast.error("소켓 오류가 발생했습니다. 다시 시도해주세요.");
+      toast.error("A socket error occurred. Please try again.");
       console.error("Socket error in handleRequestChat:", err);
     }
   };

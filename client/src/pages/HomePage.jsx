@@ -8,7 +8,7 @@ import { axiosInstance } from "../lib/axios";
 import UserDetailModal from "../components/UserDetailModal";
 import { initializeSocket, getSocket } from "../socket/socket.client";
 import { useNotificationStore } from "../store/useNotificationStore";
-import { updateMatchesFromNotifications } from "../store/useMatchStore"; // 매칭 업데이트 함수
+import { updateMatchesFromNotifications } from "../store/useMatchStore"; 
 
 const HomePage = () => {
   const { getUserProfiles } = useMatchStore();
@@ -23,7 +23,7 @@ const HomePage = () => {
   const [breadcrumb, setBreadcrumb] = useState(["Home"]);
   const { addNotification } = useNotificationStore();
 
-  // 기존과 동일한 그라디언트
+ 
   const gradientClasses = [
     "bg-gradient-to-r from-purple-400 to-indigo-500",
     "bg-gradient-to-r from-orange-400 to-yellow-500",
@@ -35,7 +35,7 @@ const HomePage = () => {
     "bg-gradient-to-r from-amber-400 to-yellow-500",
   ];
 
-  // **아이콘 경로**: public/icons 폴더에 있다면, 실제 경로는 "/icons/..."
+
   const iconPaths = [
     "/icons/career-growth.png",
     "/icons/professional-dev.png",
@@ -47,19 +47,18 @@ const HomePage = () => {
     "/icons/diversity-tech.png",
   ];
 
-  // 1) 로그인/어드민 체크
+
   useEffect(() => {
     if (!authUser) {
-      // 미로그인
+
       navigate("/auth");
     } else if (authUser.name === "admin") {
-      // 어드민
+
       navigate("/admin");
     }
-    // 멘토는 홈화면 그대로, 단 카테고리 카드 안 보이게 처리
+  
   }, [authUser, navigate]);
 
-  // 2) 카테고리 불러오기 및 소켓 초기화
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     console.log("User ID from localStorage:", userId);
@@ -95,7 +94,7 @@ const HomePage = () => {
       socket.on("chatResponse", ({ mentorId, status, mentorName, mentorImage }) => {
         console.log("Received chatResponse:", { mentorId, status, mentorName, mentorImage });
         addNotification({
-          message: `${mentorName}님이 채팅 요청을 ${status === "accepted" ? "수락" : "거절"}했습니다.`,
+          message: `${mentorName} has ${status === "accepted" ? "accepted" : "declined"} the chat request.`,
           mentorId,
           status,
           mentorName,
@@ -117,12 +116,12 @@ const HomePage = () => {
     };
   }, [addNotification]);
 
-  // 3) 유저 프로필 불러오기 (매칭 스토어)
+
   useEffect(() => {
     getUserProfiles();
   }, [getUserProfiles]);
 
-  // 4) 특정 서브카테고리 선택 시 멘토 목록 불러오기
+
   useEffect(() => {
     const fetchMentors = async () => {
       if (selectedSubcategory) {
@@ -142,7 +141,6 @@ const HomePage = () => {
     if (selectedSubcategory) fetchMentors();
   }, [selectedSubcategory]);
 
-  // 빵조각(브레드크럼) 처리
   const handleBreadcrumbClick = (index) => {
     if (index === 0) {
       setBreadcrumb(["Home"]);
@@ -156,14 +154,12 @@ const HomePage = () => {
     }
   };
 
-  // =========================
-  // 5) "카테고리 카드" 렌더링
-  // =========================
+
   let content;
 
   if (authUser?.role === "mentee") {
     if (!selectedCategory && !selectedSubcategory) {
-      // 메인 카테고리 목록
+
       content = (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {categories.map((cat, idx) => (
@@ -189,7 +185,7 @@ const HomePage = () => {
         </div>
       );
     } else if (selectedCategory && !selectedSubcategory) {
-      // 서브카테고리 목록
+
       content = (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {selectedCategory.subcategories.map((subcat, idx) => (
@@ -209,7 +205,7 @@ const HomePage = () => {
         </div>
       );
     } else if (selectedSubcategory) {
-      // 멘토 목록
+
       content = (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {mentors.length > 0 ? (
@@ -236,14 +232,14 @@ const HomePage = () => {
             ))
           ) : (
             <div className="col-span-3 p-4 text-center text-gray-500">
-              해당 세부 카테고리에 멘토가 없습니다.
+              There is no mentor in this specific category.
             </div>
           )}
         </div>
       );
     }
   } else {
-    // 멘티가 아닌 경우 => 다른 메시지
+ 
     content = (
       <div className="p-4 text-center text-gray-500">
         <p className="text-xl font-semibold mb-2">Always thanks to your service!</p>
@@ -259,7 +255,7 @@ const HomePage = () => {
         <Header />
         <div className="flex-grow overflow-y-auto">
           <div className="container mx-auto p-4">
-            {/* 빵조각 */}
+         
             <nav className="mb-4 text-sm">
               {breadcrumb.map((bc, idx) => (
                 <span key={idx} className="text-gray-600">
@@ -274,12 +270,12 @@ const HomePage = () => {
               ))}
             </nav>
 
-            {/* 메인 컨텐츠 */}
+        
             {content}
           </div>
         </div>
 
-        {/* 유저 디테일 모달 */}
+       
         {selectedUser && (
           <UserDetailModal
             user={selectedUser}

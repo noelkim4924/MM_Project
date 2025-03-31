@@ -47,13 +47,13 @@ const ChatPage = () => {
 
   const confirmLeave = async () => {
     try {
-      // 대화 기록 삭제
+ 
       await axiosInstance.delete(`/messages/conversation/${chatPartnerId}`);
-      // 매칭 해제
+
       await axiosInstance.post(`/matches/unmatch/${chatPartnerId}`);
-      // 상태 초기화
-      clearMessages(); // 메시지 상태 초기화
-      removeMatch(chatPartnerId); // 매칭 상태에서 제거
+   
+      clearMessages(); 
+      removeMatch(chatPartnerId); 
       setIsToastOpen(false);
       navigate("/home");
     } catch (error) {

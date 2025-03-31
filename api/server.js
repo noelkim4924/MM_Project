@@ -21,10 +21,10 @@ const app = express();
 const httpServer = createServer(app);
 const PORT = process.env.PORT || 5001;
 
-// 환경 변수 로드 확인
+
 console.log("CLIENT_URL:", process.env.CLIENT_URL);
 
-// 소켓 초기화
+
 initializeSocket(httpServer);
 
 app.use(express.json({ limit: "10mb" }));
@@ -44,7 +44,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use('/api/logs', logRoutes);
 
-// DB 연결 실패 시 서버 계속 실행
+
 const startServer = async () => {
   try {
     await connectDB();
