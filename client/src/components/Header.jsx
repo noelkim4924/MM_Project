@@ -12,7 +12,7 @@ export const Header = () => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate(); // <-- 추가
+  const navigate = useNavigate(); 
   const notificationDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export const Header = () => {
                     <div className='absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10'>
                       <div className='p-2'>
                         {notifications.length === 0 ? (
-                          <p className='text-gray-500 text-center text-sm'>알림이 없습니다.</p>
+                          <p className='text-gray-500 text-center text-sm'>No Alert yet.</p>
                         ) : (
                           notifications.map((notif) => (
                             <div
@@ -85,13 +85,13 @@ export const Header = () => {
                                     onClick={() => handleRespond(notif.requestId, 'accepted')}
                                     className='text-green-500 hover:underline text-xs'
                                   >
-                                    수락
+                                    Accept
                                   </button>
                                   <button
                                     onClick={() => handleRespond(notif.requestId, 'declined')}
                                     className='text-red-500 hover:underline text-xs'
                                   >
-                                    거절
+                                    Decline
                                   </button>
                                 </div>
                               )}
@@ -180,7 +180,7 @@ export const Header = () => {
                 <button
           onClick={() => {
             logout();
-            navigate("/auth"); // <-- 로그아웃 후 즉시 /auth 이동
+            navigate("/auth"); 
           }}
         >
           <LogOut size={16} />
