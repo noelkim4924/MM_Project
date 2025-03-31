@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { axiosInstance } from '../lib/axios';
+import { axiosInstance } from '../../lib/axios';
 import { toast } from "react-hot-toast";
 import CategoryDropdown from "../CategoryDropdown";
 
