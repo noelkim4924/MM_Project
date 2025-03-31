@@ -31,21 +31,21 @@ const UserDetailModal = ({ user, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gradient-to-r from-purple-400 to-blue-500 p-6 rounded-lg shadow-lg w-96 relative">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-white hover:text-gray-300 text-lg"
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-lg"
         >
           ✕
         </button>
-        <div className="flex flex-col items-center text-white">
+        <div className="flex flex-col items-center text-black">
           <img
             src={user.image && user.image.trim() !== "" ? user.image : "/avatar.png"}
             alt="User avatar"
-            className="w-28 h-28 rounded-full border-2 border-blue-300 mb-3"
+            className="w-28 h-28 rounded-full border-2 border-gray-300 mb-4"
           />
           <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
-          <p className="text-sm mb-1">Age: {user.age}</p>
+          <p className="text-sm mb-1">Bio: {user.bio}</p>
           <p className="text-sm mb-1">Email: {user.email}</p>
           <p className="text-sm italic mb-4">
             {user.bio ? user.bio : "No bio provided."}

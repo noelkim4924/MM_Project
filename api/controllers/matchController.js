@@ -110,7 +110,7 @@ export const getUserProfiles = async (req, res) => {
         categories: category,
         _id: { $ne: userId },
         matches: { $nin: [userId] },
-      }).select("name image age");
+      }).select("name image age bio");
     } catch (err) {
       console.error("Primary query failed, falling back to alternative query", err);
       const conditions = [

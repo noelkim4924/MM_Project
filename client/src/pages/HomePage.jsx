@@ -169,7 +169,7 @@ const HomePage = () => {
           {categories.map((cat, idx) => (
             <div
               key={cat._id}
-              className={`p-4 cursor-pointer rounded-lg ${gradientClasses[idx % gradientClasses.length]} text-white h-48 w-full flex items-center justify-center`}
+              className={`p-6 cursor-pointer rounded-lg border-2 border-gray-300 bg-white text-black h-56 w-full flex flex-col items-center justify-between shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105`}
               onClick={() => {
                 setSelectedCategory(cat);
                 setBreadcrumb(["Home", cat.name]);
@@ -195,7 +195,7 @@ const HomePage = () => {
           {selectedCategory.subcategories.map((subcat, idx) => (
             <div
               key={subcat._id}
-              className={`p-4 cursor-pointer rounded-lg ${gradientClasses[idx % gradientClasses.length]} text-white h-48 w-full flex items-center justify-center`}
+              className={`p-6 cursor-pointer rounded-lg border-2 border-gray-300 bg-white text-black h-56 w-full flex flex-col items-center justify-between shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105`}
               onClick={() => {
                 setSelectedSubcategory(subcat);
                 setBreadcrumb(["Home", selectedCategory.name, subcat.name]);
@@ -216,7 +216,7 @@ const HomePage = () => {
             mentors.map((mentor, idx) => (
               <div
                 key={mentor._id}
-                className={`p-4 cursor-pointer rounded-lg ${gradientClasses[idx % gradientClasses.length]} text-white h-48 w-full flex items-center justify-center`}
+                className={`p-6 cursor-pointer rounded-lg border-2 border-gray-300 bg-white text-black h-56 w-full flex flex-col items-center justify-between shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105`}
                 onClick={() => setSelectedUser(mentor)}
               >
                 <img
@@ -226,11 +226,11 @@ const HomePage = () => {
                       : "/avatar.png"
                   }
                   alt="User avatar"
-                  className="w-20 h-20 rounded-full mb-2"
+                  className="w-20 h-20 rounded-full mb-2 border-2 border-gray-400"
                 />
                 <div className="text-center">
                   <p className="font-semibold text-lg">{mentor.name}</p>
-                  <p className="text-sm">Age: {mentor.age}</p>
+                  <p className="text-sm">Bio: {mentor.bio}</p>
                 </div>
               </div>
             ))
