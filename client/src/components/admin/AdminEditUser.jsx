@@ -22,7 +22,7 @@ const AdminEditUser = () => {
   useEffect(() => {
     const fetchUserDetail = async () => {
       try {
-        const res = await axiosInstance.get(`/admin/users/${id}`);
+        const res = await axiosInstance.get(`/users/admin/users/${id}`);
         if (res.data.success) {
           const userData = res.data.data;
           setUser(userData);
@@ -49,7 +49,7 @@ const AdminEditUser = () => {
 
   const handleResetImage = async () => {
     try {
-      await axiosInstance.put(`/admin/users/${id}`, { resetImage: true });
+      await axiosInstance.put(`/users/admin/users/${id}`, { resetImage: true });
       toast.success("Image reset to default");
       fetchUserDetail();
     } catch (error) {
@@ -81,9 +81,9 @@ const AdminEditUser = () => {
     e.preventDefault();
     const updatedData = { name, age, gender, bio, categories, image, role };
     try {
-      await axiosInstance.put(`/admin/users/${id}`, updatedData);
+      await axiosInstance.put(`/users/admin/users/${id}`, updatedData);
       toast.success("User updated successfully");
-      navigate(`/admin/edit-user/${id}`);
+      navigate(`/users/admin/edit-user/${id}`);
     } catch (error) {
       console.error(error);
       toast.error("Failed to update user");
