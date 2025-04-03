@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
   age: {
     type: String,
     required: true,
-    enum: ['under 18', '18', 'over 18'],
+    enum: ['under 18', '18', 'over 18', '18+'],
   },
   gender:{
     type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['mentor', 'mentee'],
+    enum: ['mentor', 'mentee', 'admin'],
     },
     image: { type: String, default: "" },
     bio: { type: String, default: "" },

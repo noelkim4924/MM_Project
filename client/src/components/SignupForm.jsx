@@ -6,7 +6,7 @@ const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
-  const [age, setAge] = useState("18"); // Default to "18+"
+  const [age, setAge] = useState(""); // Default to "18+"
   const [role, setRole] = useState("");
   const [isAgeChecked, setIsAgeChecked] = useState(false); // Track checkbox state
 
@@ -86,7 +86,7 @@ const SignUpForm = () => {
             checked={isAgeChecked}
             onChange={(e) => {
               setIsAgeChecked(e.target.checked);
-              setAge(e.target.checked ? "18" : "");
+              setAge(e.target.checked ? "18+" : "");
             }}
             className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
           />
