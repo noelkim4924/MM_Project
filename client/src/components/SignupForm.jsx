@@ -6,8 +6,9 @@ const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState("");
-  const [age, setAge] = useState("");
-  const [role, setRole] = useState(""); 
+  const [age, setAge] = useState("18"); // Default to "18+"
+  const [role, setRole] = useState("");
+  const [isAgeChecked, setIsAgeChecked] = useState(false); // Track checkbox state
 
   const { signup, loading } = useAuthStore();
 
@@ -75,52 +76,23 @@ const SignUpForm = () => {
         </div>
       </div>
 
-      {/* AGE */}
+      {/* AGE CHECKBOX */}
       <div>
-        <label className="block text-sm font-medium text-gray-700">Age</label>
-        <div className="mt-2 space-y-2">
-          <div className="flex items-center">
-            <input
-              id="under-18"
-              name="age"
-              type="radio"
-              value="under 18"
-              checked={age === "under 18"}
-              onChange={(e) => setAge(e.target.value)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-            />
-            <label htmlFor="under-18" className="ml-2 block text-sm text-gray-900">
-              Under 18
-            </label>
-          </div>
-          <div className="flex items-center">
-            <input
-              id="18"
-              name="age"
-              type="radio"
-              value="18"
-              checked={age === "18"}
-              onChange={(e) => setAge(e.target.value)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-            />
-            <label htmlFor="18" className="ml-2 block text-sm text-gray-900">
-              18
-            </label>
-          </div>
-          <div className="flex items-center">
-            <input
-              id="over-18"
-              name="age"
-              type="radio"
-              value="over 18"
-              checked={age === "over 18"}
-              onChange={(e) => setAge(e.target.value)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-            />
-            <label htmlFor="over-18" className="ml-2 block text-sm text-gray-900">
-              Over 18
-            </label>
-          </div>
+        <div className="flex items-center">
+          <input
+            id="age-checkbox"
+            name="age-checkbox"
+            type="checkbox"
+            checked={isAgeChecked}
+            onChange={(e) => {
+              setIsAgeChecked(e.target.checked);
+              setAge(e.target.checked ? "18" : "");
+            }}
+            className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+          />
+          <label htmlFor="age-checkbox" className="ml-2 block text-sm text-gray-900">
+            I am at least 18 years of age
+          </label>
         </div>
       </div>
 
@@ -211,11 +183,10 @@ const SignUpForm = () => {
       <div>
         <button
           type="submit"
-          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-            loading
+          className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${loading
               ? "bg-green-400 cursor-not-allowed"
               : "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          }`}
+            }`}
           disabled={loading}
         >
           {loading ? "Signing up..." : "Sign up"}
