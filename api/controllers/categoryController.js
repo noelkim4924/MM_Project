@@ -46,20 +46,30 @@ export const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name, subcategories } = req.body;
 
-    const categoryDoc = await Category.findOneAndUpdate(
-      { 'categories._id': id },
-      {
-        $set: {
-          'categories.$.name': name,
-          'categories.$.subcategories': subcategories.map(subcat => ({ name: subcat }))
-        }
-      },
-      { new: true }
-    );
-
+    // Find the category document
+    const categoryDoc = await Category.findOne({ 'categories._id': id });
     if (!categoryDoc) {
       return res.status(404).json({ message: 'Category not found' });
     }
+
+    // Update the category name
+    const category = categoryDoc.categories.id(id);
+    category.name = name;
+
+    // Update subcategories
+    subcategories.forEach(subcat => {
+      const existingSubcategory = category.subcategories.id(subcat._id);
+      if (existingSubcategory) {
+        // Update existing subcategory
+        existingSubcategory.name = subcat.name;
+      } else {
+        // Add new subcategory
+        category.subcategories.push({ name: subcat.name });
+      }
+    });
+
+    // Save the updated document
+    await categoryDoc.save();
 
     res.status(200).json({ success: true, data: categoryDoc.categories });
   } catch (error) {
