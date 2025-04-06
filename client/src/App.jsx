@@ -28,7 +28,7 @@ function App() {
 
   useEffect(() => {
     if (location.pathname === "/") {
-      if (authUser?.name === "admin") {
+      if (authUser?.role === "admin") {
         navigate("/admin");
       } else if (authUser) {
         navigate("/home");
@@ -90,7 +90,7 @@ function App() {
         <Route path="/auth" element={!authUser ? <AuthPage /> : <Navigate to="/home" />} /> 
         <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/auth" />} /> 
         <Route path="/chat/:id" element={authUser ? <ChatPage /> : <Navigate to="/auth" />} /> 
-        <Route path="/admin" element={authUser?.name === "admin" ? <AdminPage /> : <Navigate to="/" />} /> 
+        <Route path="/admin" element={authUser?.role === "admin" ? <AdminPage /> : <Navigate to="/" />} /> 
         <Route path="/admin/edit-user/:id" element={<AdminEditUser />} />
         <Route path="/change-password" element={authUser ? <PasswordChange /> : <Navigate to="/auth" />} />
         <Route path="/request-password-reset" element={<RequestPasswordReset />} /> 

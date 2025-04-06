@@ -135,7 +135,7 @@ const AdminEditUser = () => {
                 </div>
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Age
                 </label>
@@ -147,7 +147,7 @@ const AdminEditUser = () => {
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
                   />
                 </div>
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">

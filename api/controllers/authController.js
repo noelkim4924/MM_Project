@@ -14,6 +14,13 @@ const signToken = (id) => {
 export const signup = async (req, res) => {
 
   const { name, email, password,age,gender,role } = req.body;
+
+  if(age !== "18+"){
+    return res.status(400).json({
+      sucess: false,
+      message: 'You must be at least 18 years old'})
+  }
+  
   try {
     if(!name || !email || !password || !age|| !gender|| !role){
       return res.status(400).json({
@@ -26,6 +33,18 @@ export const signup = async (req, res) => {
         sucess: false,
         message: 'Password must be at least 6 characters'})
     }
+
+    
+
+    // Check if a user with the same email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email already exists',
+      });
+    }
+    
 
     const newUser = await User.create({
       name,

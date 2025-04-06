@@ -50,7 +50,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
           {/* Header */}
           <div className="p-4 pb-[27px] border-b border-blue-200 flex justify-between items-center">
             <h2 className="text-xl font-bold text-blue-400">
-              {authUser?.name === "admin" ? "Admin Panel" : "Matches"}
+              {authUser?.role === "admin" ? "Admin Panel" : "Matches"}
             </h2>
             <button
               className="lg:hidden p-1 text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -61,7 +61,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
           </div>
 
    
-          {authUser?.name === "admin" ? (
+          {authUser?.role === "admin" ? (
             <div className="flex-grow overflow-y-auto p-4">
               <ul className="space-y-4">
                 <li 
@@ -99,7 +99,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
           ) : null}
 
  
-          {authUser?.name !== "admin" && (
+          {authUser?.role !== "admin" && (
             <div className="flex-grow overflow-y-auto p-4 z-10 relative">
               {isLoadingMyMatches ? (
                 <LoadingState />

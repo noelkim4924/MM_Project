@@ -182,19 +182,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* AGE - Read Only */}
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">
-                  Age
-                </label>
-                <div className="ml-2 text-sm text-red-600">
-                  ✉️ To change age, gender, or role, email the admin.
-                </div>
-              </div>
-              <div className="mt-1 text-sm text-gray-500 bg-gray-100 px-3 py-2 border border-gray-300 rounded-md">
-                {age || "Not set"}
-              </div>
-
               {/* GENDER - Read Only */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">

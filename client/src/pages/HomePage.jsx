@@ -52,7 +52,7 @@ const HomePage = () => {
     if (!authUser) {
 
       navigate("/auth");
-    } else if (authUser.name === "admin") {
+    } else if (authUser.role === "admin") {
 
       navigate("/admin");
     }
@@ -60,7 +60,7 @@ const HomePage = () => {
   }, [authUser, navigate]);
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
+    const userId = authUser?._id || localStorage.getItem("userId");
     console.log("User ID from localStorage:", userId);
     if (userId) {
       initializeSocket(userId);
