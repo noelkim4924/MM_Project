@@ -15,10 +15,10 @@ export const signup = async (req, res) => {
 
   const { name, email, password,age,gender,role } = req.body;
 
-  if(age !== "18+"){
+  if(age !== "19+"){
     return res.status(400).json({
       sucess: false,
-      message: 'You must be at least 18 years old'})
+      message: 'You must be at least 19 years old'})
   }
   
   try {
