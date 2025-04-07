@@ -98,12 +98,12 @@ const SignUpForm = () => {
               checked={isAgeChecked}
               onChange={(e) => {
                 setIsAgeChecked(e.target.checked);
-                setAge(e.target.checked ? "18+" : "");
+                setAge(e.target.checked ? "19+" : "");
               }}
               className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
             />
             <label htmlFor="age-checkbox" className="ml-2 block text-sm text-gray-900">
-              I am at least 18 years of age
+              I am at least 19 years of age
             </label>
           </div>
         </div>
