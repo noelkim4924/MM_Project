@@ -98,7 +98,7 @@ const ChatPage = () => {
           </button>
         </div>
 
-        <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg shadow p-4">
+        <div className="flex-grow overflow-y-auto mb-4 bg-gray-200 rounded-lg shadow p-4">
           {messages.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               Start your conversation with {chatPartner ? chatPartner.name : chatPartnerId}

@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { User, LogOut, Menu, Bell } from "lucide-react";
 import { getSocket } from "../socket/socket.client";
-//t
+
 export const Header = () => {
   const { authUser, logout } = useAuthStore();
   const { notifications, removeNotification, respondToChatRequest } = useNotificationStore();
@@ -12,7 +12,7 @@ export const Header = () => {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate(); // <-- 추가
+  const navigate = useNavigate();
   const notificationDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export const Header = () => {
   };
 
   return (
-    <header className='bg-gradient-to-r from-green-400 via-green-500 to-blue-500 shadow-lg'>
+    <header className='bg-white shadow-lg'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center py-4'>
           <div className='flex items-center'>
@@ -48,7 +48,7 @@ export const Header = () => {
                 className='w-8 h-8 object-contain'
                 alt='Shift Logo'
               />
-              <span className='text-2xl font-bold text-white hidden sm:inline'>MM</span>
+              <span className='text-2xl font-bold text-black hidden sm:inline'>STO | Metnor Match</span>
             </Link>
           </div>
 
@@ -58,7 +58,7 @@ export const Header = () => {
                 <div className='relative' ref={notificationDropdownRef}>
                   <button
                     onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
-                    className='relative text-white focus:outline-none'
+                    className='relative text-black focus:outline-none'
                   >
                     <Bell className='size-6' />
                     {notifications.length > 0 && (
@@ -71,7 +71,7 @@ export const Header = () => {
                     <div className='absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-10'>
                       <div className='p-2'>
                         {notifications.length === 0 ? (
-                          <p className='text-gray-500 text-center text-sm'>알림이 없습니다.</p>
+                          <p className='text-gray-500 text-center text-sm'>No alert.</p>
                         ) : (
                           notifications.map((notif) => (
                             <div
@@ -85,13 +85,13 @@ export const Header = () => {
                                     onClick={() => handleRespond(notif.requestId, 'accepted')}
                                     className='text-green-500 hover:underline text-xs'
                                   >
-                                    수락
+                                    accept
                                   </button>
                                   <button
                                     onClick={() => handleRespond(notif.requestId, 'declined')}
                                     className='text-red-500 hover:underline text-xs'
                                   >
-                                    거절
+                                    decline
                                   </button>
                                 </div>
                               )}
@@ -110,10 +110,10 @@ export const Header = () => {
                   >
                     <img
                       src={authUser.image || "/avatar.png"}
-                      className='h-10 w-10 object-cover rounded-full border-2 border-white'
+                      className='h-10 w-10 object-cover rounded-full border-2 border-gray-300'
                       alt='User image'
                     />
-                    <span className='text-white font-medium'>{authUser.name}</span>
+                    <span className='text-black font-medium'>{authUser.name}</span>
                   </button>
                   {dropdownOpen && (
                     <div className='absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10'>
@@ -140,13 +140,13 @@ export const Header = () => {
               <>
                 <Link
                   to='/auth'
-                  className='text-white hover:text-green-200 transition duration-150 ease-in-out'
+                  className='text-black hover:text-gray-600 transition duration-150 ease-in-out'
                 >
                   Login
                 </Link>
                 <Link
                   to='/auth'
-                  className='bg-white text-green-600 px-4 py-2 rounded-full font-medium hover:bg-green-100 transition duration-150 ease-in-out'
+                  className='bg-black text-white px-4 py-2 rounded-full font-medium hover:bg-gray-800 transition duration-150 ease-in-out'
                 >
                   Sign Up
                 </Link>
@@ -157,7 +157,7 @@ export const Header = () => {
           <div className='md:hidden'>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className='text-white focus:outline-none'
+              className='text-black focus:outline-none'
             >
               <Menu className='size-6' />
             </button>
@@ -166,39 +166,40 @@ export const Header = () => {
       </div>
 
       {mobileMenuOpen && (
-        <div className='md:hidden bg-green-600'>
+        <div className='md:hidden bg-white'>
           <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3'>
             {authUser ? (
               <>
                 <Link
                   to='/profile'
-                  className='block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-green-700'
+                  className='block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-100'
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Profile
                 </Link>
                 <button
-          onClick={() => {
-            logout();
-            navigate("/auth"); // <-- 로그아웃 후 즉시 /auth 이동
-          }}
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
+                  onClick={() => {
+                    logout();
+                    navigate("/auth");
+                  }}
+                  className='block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-100'
+                >
+                  <LogOut size={16} className='inline mr-2' />
+                  Logout
+                </button>
               </>
             ) : (
               <>
                 <Link
                   to='/auth'
-                  className='block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-green-700'
+                  className='block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-100'
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Login
                 </Link>
                 <Link
                   to='/auth'
-                  className='block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-green-700'
+                  className='block px-3 py-2 rounded-md text-base font-medium text-black hover:bg-gray-100'
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign Up
