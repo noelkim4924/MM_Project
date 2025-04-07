@@ -6,7 +6,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useMatchStore } from "../store/useMatchStore";
 import { Header } from "../components/Header";
 import MessageInput from "../components/MessageInput";
-import { axiosInstance } from '../lib/axios'; 
+import { axiosInstance } from "../lib/axios";
 import ConfirmToast from "../components/admin/ConfirmToast";
 
 const ChatPage = () => {
@@ -47,13 +47,10 @@ const ChatPage = () => {
 
   const confirmLeave = async () => {
     try {
- 
       await axiosInstance.delete(`/messages/conversation/${chatPartnerId}`);
-
       await axiosInstance.post(`/matches/unmatch/${chatPartnerId}`);
-   
-      clearMessages(); 
-      removeMatch(chatPartnerId); 
+      clearMessages();
+      removeMatch(chatPartnerId);
       setIsToastOpen(false);
       navigate("/home");
     } catch (error) {
@@ -98,7 +95,7 @@ const ChatPage = () => {
           </button>
         </div>
 
-        <div className="flex-grow overflow-y-auto mb-4 bg-white rounded-lg shadow p-4">
+        <div className="flex-grow overflow-y-auto mb-4 bg-gray-200 rounded-lg shadow p-4">
           {messages.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
               Start your conversation with {chatPartner ? chatPartner.name : chatPartnerId}
@@ -112,7 +109,7 @@ const ChatPage = () => {
                 <span
                   className={`inline-block p-3 rounded-lg max-w-xs lg:max-w-md ${
                     msg.sender === authUser._id
-                      ? "bg-blue-300 text-white"
+                      ? "bg-blue-600 text-white"
                       : "bg-green-200 text-gray-800"
                   }`}
                 >
