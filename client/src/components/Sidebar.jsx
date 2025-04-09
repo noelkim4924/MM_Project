@@ -77,12 +77,6 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
                   User Management
                 </li>
                 <li 
-                  className={`cursor-pointer p-2 rounded-md ${selectedTab === "reports" ? "bg-blue-200 text-black" : ""}`} 
-                  onClick={() => setSelectedTab("reports")}
-                >
-                  Reports
-                </li>
-                <li 
                   className={`cursor-pointer p-2 rounded-md ${selectedTab === "history" ? "bg-blue-200 text-black" : ""}`} 
                   onClick={() => setSelectedTab("history")}
                 >

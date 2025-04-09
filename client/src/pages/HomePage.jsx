@@ -85,7 +85,7 @@ const HomePage = () => {
       socket.on("chatRequest", ({ menteeId, menteeName, requestId }) => {
         console.log("Received chatRequest:", { menteeId, menteeName, requestId });
         addNotification({
-          message: `${menteeName}님으로부터 새로운 채팅 요청이 도착했습니다!`,
+          message: `You have received a new chat request from ${menteeName}.`,
           menteeId,
           requestId,
         });

@@ -48,7 +48,7 @@ export const Header = () => {
                 className='w-8 h-8 object-contain'
                 alt='Shift Logo'
               />
-              <span className='text-2xl font-bold text-black hidden sm:inline'>STO | Metnor Match</span>
+              <span className='text-2xl font-bold text-black hidden sm:inline'>STO | MenTor Match</span>
             </Link>
           </div>
 
