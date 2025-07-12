@@ -68,7 +68,7 @@ export const signup = async (req, res) => {
     // Log the user creation
     await Log.create({
       user: newUser._id,
-      action: `User created: ${name}, ${email}, ${role}`,
+      action: `USER created`,
       timestamp: Date.now()
     });
 

@@ -308,7 +308,7 @@ export const verifyMentorCategory = async (req, res) => {
     // Log the user creation
     await Log.create({
       user: mentorId,
-      action: `${categoryName} ${status} for ${mentorName}`,
+      action: `${status.toUpperCase()} – ${categoryName}`,
       status: status,
       timestamp: Date.now()
     });
